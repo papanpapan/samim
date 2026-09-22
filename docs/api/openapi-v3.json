@@ -1,0 +1,70 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Saba Nursery ERMS API",
+    "version": "3.0.0",
+    "description": "Standalone Node.js REST API for the Saba Nursery Enterprise Resource & Smart Inventory Management System."
+  },
+  "servers": [{ "url": "http://localhost:4000/api/v1" }],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    }
+  },
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "Authenticate and receive a JWT",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Token + user" }, "401": { "description": "Invalid credentials" } }
+      }
+    },
+    "/auth/me": { "get": { "summary": "Current authenticated user", "responses": { "200": { "description": "User" } } } },
+    "/mother-plants": {
+      "get": { "summary": "List mother plants", "responses": { "200": { "description": "OK" } } },
+      "post": { "summary": "Register a mother plant (ADMIN/MANAGER)", "responses": { "201": { "description": "Created" } } }
+    },
+    "/mother-plants/{id}/scions": { "post": { "summary": "Log scion harvest", "responses": { "200": { "description": "OK" } } } },
+    "/propagation": {
+      "get": { "summary": "List propagation batches", "responses": { "200": { "description": "OK" } } },
+      "post": { "summary": "Create a batch", "responses": { "201": { "description": "Created" } } }
+    },
+    "/propagation/{id}/stage": { "patch": { "summary": "Advance lifecycle stage (records mortality)", "responses": { "200": { "description": "OK" } } } },
+    "/propagation/{id}/ready": { "post": { "summary": "Mark ready: create inventory SKU + push stock atomically", "responses": { "201": { "description": "Created" } } } },
+    "/inventory": {
+      "get": { "summary": "List / search inventory", "responses": { "200": { "description": "OK" } } },
+      "post": { "summary": "Create inventory item (ADMIN/MANAGER)", "responses": { "201": { "description": "Created" } } }
+    },
+    "/inventory/sku/{sku}": { "get": { "summary": "Fast SKU lookup for POS scanner", "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } } } },
+    "/inventory/{id}/label": { "get": { "summary": "Generate thermal QR label (PNG + SVG)", "responses": { "200": { "description": "OK" } } } },
+    "/inventory/{id}/ledger": { "get": { "summary": "Immutable stock ledger for an item", "responses": { "200": { "description": "OK" } } } },
+    "/inventory/{id}/adjust": { "post": { "summary": "Adjust stock (PURCHASE/MORTALITY/ADJUSTMENT)", "responses": { "200": { "description": "OK" } } } },
+    "/vermicompost": {
+      "get": { "summary": "List vermicompost beds", "responses": { "200": { "description": "OK" } } },
+      "post": { "summary": "Register a bed", "responses": { "201": { "description": "Created" } } }
+    },
+    "/vermicompost/{id}/harvest": { "post": { "summary": "Harvest a bed & record yield", "responses": { "200": { "description": "OK" } } } },
+    "/sales": {
+      "get": { "summary": "List sales", "responses": { "200": { "description": "OK" } } },
+      "post": { "summary": "Create sale (atomic stock decrement + ledger)", "responses": { "201": { "description": "Created" }, "409": { "description": "Insufficient stock" } } }
+    },
+    "/reports/dashboard": { "get": { "summary": "Dashboard KPI snapshot", "responses": { "200": { "description": "OK" } } } },
+    "/reports/profitability": { "get": { "summary": "Revenue vs cost profitability", "responses": { "200": { "description": "OK" } } } }
+  }
+}

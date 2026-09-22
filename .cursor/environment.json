@@ -1,0 +1,16 @@
+{
+  "name": "Saba Nursery ERMS",
+  "install": "bash .cursor/install.sh",
+  "start": "bash .cursor/start.sh",
+  "terminals": [
+    {
+      "name": "backend-api",
+      "command": "cd backend-service && npm run dev"
+    },
+    {
+      "name": "client-pwa",
+      "command": "cd client-app && npm run dev"
+    }
+  ],
+  "ports": [4000, 5173]
+}

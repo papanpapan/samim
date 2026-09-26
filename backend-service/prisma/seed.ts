@@ -1,5 +1,6 @@
 import { PrismaClient, Role, PropagationMethod, BatchStage } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { seedDemoMothers } from './demoMothers';
 
 const prisma = new PrismaClient();
 
@@ -16,12 +17,32 @@ async function main() {
     { email: 'staff@sabanursery.com', name: 'Field Horticulturist', role: Role.STAFF, password: 'Staff@123' },
   ];
 
+  const nursery = await prisma.nursery.upsert({
+    where: { code: 'SABA' },
+    update: { currencyCode: 'BDT' },
+    create: { name: 'Saba Nursery', code: 'SABA', city: 'Kolkata', currencyCode: 'BDT' },
+  });
+
   for (const u of users) {
     const passwordHash = await bcrypt.hash(u.password, SALT);
     await prisma.user.upsert({
       where: { email: u.email },
-      update: { name: u.name, role: u.role, passwordHash, isActive: true },
-      create: { email: u.email, name: u.name, role: u.role, passwordHash },
+      update: {
+        name: u.name,
+        role: u.role,
+        passwordHash,
+        isActive: true,
+        nurseryId: nursery.id,
+        isPlatformOwner: u.email === ADMIN_EMAIL,
+      },
+      create: {
+        email: u.email,
+        name: u.name,
+        role: u.role,
+        passwordHash,
+        nurseryId: nursery.id,
+        isPlatformOwner: u.email === ADMIN_EMAIL,
+      },
     });
   }
   // eslint-disable-next-line no-console
@@ -56,20 +77,34 @@ async function main() {
   ];
   for (const m of mothers) {
     await prisma.motherPlant.upsert({
-      where: { tagNumber: m.tagNumber },
+      where: { nurseryId_tagNumber: { nurseryId: nursery.id, tagNumber: m.tagNumber } },
       update: {},
-      create: { ...m, plantingDate: new Date('2024-03-15'), healthStatus: 'EXCELLENT' },
+      create: {
+        ...m,
+        nurseryId: nursery.id,
+        plantingDate: new Date('2024-03-15'),
+        category: m.varietyName.includes('Adenium') ? 'FLOWERING' : 'FRUIT',
+        plantName: m.varietyName.split(' ').at(-1) ?? m.varietyName,
+        healthStatus: 'HEALTHY',
+        propagationMethods: ['GRAFTING_SCION'],
+        shareCode: m.tagNumber.replace(/[^A-Za-z0-9]/g, '').toLowerCase(),
+      },
     });
   }
   console.log(`Seeded ${mothers.length} mother plants.`);
+  const demoCount = await seedDemoMothers(prisma, nursery.id);
+  console.log(`Seeded ${demoCount} demo mother plants.`);
 
   // --- One ready batch + inventory so the dashboard has data ---
-  const mother = await prisma.motherPlant.findUnique({ where: { tagNumber: 'MP-BDG-01' } });
+  const mother = await prisma.motherPlant.findUnique({
+    where: { nurseryId_tagNumber: { nurseryId: nursery.id, tagNumber: 'MP-BDG-01' } },
+  });
   if (mother) {
     const batch = await prisma.propagationBatch.upsert({
-      where: { batchCode: 'BATCH-2026-BDG-001' },
+      where: { nurseryId_batchCode: { nurseryId: nursery.id, batchCode: 'BATCH-2026-BDG-001' } },
       update: {},
       create: {
+        nurseryId: nursery.id,
         batchCode: 'BATCH-2026-BDG-001',
         motherPlantId: mother.id,
         method: PropagationMethod.AIR_LAYERING,
@@ -83,11 +118,14 @@ async function main() {
       },
     });
 
-    const existing = await prisma.plantInventory.findUnique({ where: { sku: 'PLT-BDG-5X7-01' } });
+    const existing = await prisma.plantInventory.findUnique({
+      where: { nurseryId_sku: { nurseryId: nursery.id, sku: 'PLT-BDG-5X7-01' } },
+    });
     if (!existing) {
       await prisma.$transaction(async (tx) => {
         const plant = await tx.plantInventory.create({
           data: {
+            nurseryId: nursery.id,
             sku: 'PLT-BDG-5X7-01',
             commonName: 'Black Diamond Guava',
             variety: 'Thai Hybrid',
@@ -123,9 +161,10 @@ async function main() {
 
   // --- Vermicompost bed ---
   await prisma.vermicompostBed.upsert({
-    where: { bedCode: 'V-BED-01' },
+    where: { nurseryId_bedCode: { nurseryId: nursery.id, bedCode: 'V-BED-01' } },
     update: {},
     create: {
+      nurseryId: nursery.id,
       bedCode: 'V-BED-01',
       rawBiomassKg: 300,
       cowDungKg: 1200,

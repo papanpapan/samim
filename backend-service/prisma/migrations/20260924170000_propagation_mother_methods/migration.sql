@@ -1,0 +1,2 @@
+ALTER TYPE "PropagationMethod" ADD VALUE 'GRAFTING_SCION';
+ALTER TYPE "PropagationMethod" ADD VALUE 'TISSUE_CULTURE';

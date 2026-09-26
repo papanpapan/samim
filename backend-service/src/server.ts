@@ -2,9 +2,11 @@ import { createApp } from './app';
 import { env } from './config/environment';
 import { logger } from './config/logger';
 import { connectDatabase, disconnectDatabase } from './config/database';
+import { startOperationsScheduler } from './jobs/operations.job';
 
 async function bootstrap(): Promise<void> {
   await connectDatabase();
+  startOperationsScheduler();
   const app = createApp();
 
   const server = app.listen(env.PORT, () => {

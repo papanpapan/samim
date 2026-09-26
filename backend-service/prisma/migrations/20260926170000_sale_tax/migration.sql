@@ -1,0 +1,3 @@
+-- Basic GST fields for INR testing (not e-invoice / IRP).
+ALTER TABLE "Sale" ADD COLUMN IF NOT EXISTS "taxPct" DECIMAL(5,2) NOT NULL DEFAULT 0;
+ALTER TABLE "Sale" ADD COLUMN IF NOT EXISTS "taxAmount" DECIMAL(10,2) NOT NULL DEFAULT 0;

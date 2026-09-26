@@ -1,0 +1,19 @@
+---
+description: Explain every code change to Samim in Bangla, and keep this Windows PC off the Linux cloud scripts
+alwaysApply: true
+---
+
+# Guide Samim
+
+Samim writes the code and wants to see where each change lands. This PC is Windows. PostgreSQL 18 is already installed locally. `.cursor/install.sh` and `.cursor/start.sh` are Linux cloud-agent scripts. Do not run them here.
+
+Before editing, name the files you will touch and why, in Bangla.
+
+After editing, explain in Bangla. For each file say the path, what changed, and what the user will see. Point at the changed lines. Skip files you did not touch.
+
+```text
+MotherPlants.tsx — লিস্টে দাম সেভের বোতাম যোগ হয়েছে।
+environment.ts — প্রোডাকশনে ছোট JWT_SECRET এখন সার্ভার আটকায়।
+```
+
+Do not change an unrelated file to "clean it up". If a step can break login, stock, or a live nursery, say so before doing it.

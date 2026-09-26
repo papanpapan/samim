@@ -4,6 +4,11 @@
 
 :root {
   color-scheme: light;
+  --font-scale: 100%;
+}
+
+html {
+  font-size: var(--font-scale);
 }
 
 html,
@@ -12,34 +17,156 @@ body,
   height: 100%;
 }
 
+html,
+body,
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
-  background: #f0fdf4;
-  color: #14532d;
+  font-family: 'Inter', 'Noto Sans Bengali', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Malayalam', 'Noto Sans Thai', 'Noto Sans SC', 'Noto Sans JP', system-ui, sans-serif;
+  background: #F8FAFC;
+  color: #1E293B;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Home-screen / standalone PWA: no browser chrome feel */
+@media all and (display-mode: standalone) {
+  body {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  input,
+  textarea,
+  [contenteditable='true'] {
+    user-select: text;
+    -webkit-user-select: text;
+  }
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-nursery-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-forest-600 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-primary {
-    @apply btn bg-nursery-700 text-white hover:bg-nursery-800;
+    @apply btn bg-forest-700 text-white hover:bg-forest-800;
   }
   .btn-ghost {
-    @apply btn bg-white text-nursery-800 ring-1 ring-inset ring-nursery-200 hover:bg-nursery-50;
+    @apply btn bg-white text-slate-700 ring-1 ring-inset ring-slate-200 hover:bg-slate-50;
   }
   .card {
-    @apply rounded-2xl border border-nursery-100 bg-white shadow-sm;
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
   }
   .label {
-    @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-nursery-700;
+    @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500;
   }
   .input {
-    @apply w-full rounded-lg border border-nursery-200 bg-white px-3 py-2 text-sm text-nursery-900 outline-none focus:border-nursery-500 focus:ring-2 focus:ring-nursery-200;
+    @apply min-h-12 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-forest-600 focus:ring-2 focus:ring-forest-100;
   }
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
   }
+  .skeleton {
+    background: linear-gradient(90deg, #e7eeea 25%, #f7faf8 37%, #e7eeea 63%);
+    background-size: 400% 100%;
+    animation: skeleton-shimmer 1.15s ease infinite;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+@media (max-width: 1023px) {
+  main table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+html[data-theme='dark'] body {
+  background: #000;
+  color: #fff;
+}
+html[data-theme='dark'] .bg-nursery-50,
+html[data-theme='dark'] .bg-\[\#f7faf8\] {
+  background-color: #000 !important;
+}
+html[data-theme='dark'] .bg-white,
+html[data-theme='dark'] .bg-white\/80,
+html[data-theme='dark'] .card {
+  background-color: #050505 !important;
+  color: #fff;
+  border-color: #fff !important;
+}
+html[data-theme='dark'] .text-nursery-950,
+html[data-theme='dark'] .text-nursery-900,
+html[data-theme='dark'] .text-nursery-800,
+html[data-theme='dark'] .text-nursery-700 {
+  color: #fff !important;
+}
+html[data-theme='dark'] .text-nursery-600,
+html[data-theme='dark'] .text-nursery-500,
+html[data-theme='dark'] .text-nursery-400 {
+  color: #f5f5f5 !important;
+}
+html[data-theme='dark'] .input,
+html[data-theme='dark'] .btn-ghost {
+  background: #000 !important;
+  color: #fff !important;
+  border-color: #fff !important;
+}
+html[data-theme='dark'] .btn-primary {
+  background: #ffe14a !important;
+  color: #000 !important;
+}
+html[data-theme='dark'] header {
+  background: #000 !important;
+  border-color: #fff !important;
+}
+
+html[data-theme='warm'] body,
+html[data-theme='warm'] .bg-nursery-50,
+html[data-theme='warm'] .bg-\[\#f7faf8\] {
+  background-color: #f3e6cf !important;
+  color: #3f2e1e;
+}
+html[data-theme='warm'] .bg-white,
+html[data-theme='warm'] .bg-white\/80,
+html[data-theme='warm'] .card {
+  background-color: #fff8ee !important;
+  border-color: #e4d0ae !important;
+}
+html[data-theme='warm'] .text-nursery-950,
+html[data-theme='warm'] .text-nursery-900,
+html[data-theme='warm'] .text-nursery-800 {
+  color: #3f2e1e !important;
+}
+html[data-theme='warm'] .input {
+  background: #fffaf3 !important;
+  border-color: #e4d0ae !important;
+  color: #3f2e1e !important;
+}
+html[data-theme='warm'] .btn-primary {
+  background: #8a5a2b !important;
+}
+html[data-theme='warm'] header {
+  background: #fff8ee !important;
+  border-color: #e4d0ae !important;
 }

@@ -5,7 +5,8 @@ import type { User } from '../types';
 interface AuthState {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  refresh: () => Promise<void>;
   logout: () => void;
 }
 
@@ -31,7 +32,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const res = await api.post('/auth/login', { email, password });
     setToken(res.data.data.token);
-    setUser(res.data.data.user);
+    const next = res.data.data.user as User;
+    setUser(next);
+    if (next.nursery?.id) localStorage.setItem('sn-nursery', next.nursery.id);
+    return next;
+  };
+
+  const refresh = async () => {
+    const res = await api.get('/auth/me');
+    setUser(res.data.data);
   };
 
   const logout = () => {
@@ -40,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.assign('/login');
   };
 
-  const value = useMemo(() => ({ user, loading, login, logout }), [user, loading]);
+  const value = useMemo(() => ({ user, loading, login, refresh, logout }), [user, loading]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

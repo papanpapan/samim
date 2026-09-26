@@ -24,6 +24,8 @@ enum PropagationMethod {
   PATCH_BUDDING
   CUTTING
   SEEDLING
+  GRAFTING_SCION
+  TISSUE_CULTURE
 }
 
 enum BatchStage {
@@ -34,12 +36,10 @@ enum BatchStage {
   CLOSED
 }
 
-enum SalesChannel {
-  RETAIL_COUNTER
-  WHOLESALE_ORCHARDIST
-  INDIAMART
-  MEESHO
-  AMAZON
+enum UnitStatus {
+  GROWING
+  LOST
+  READY
 }
 
 enum PaymentMode {
@@ -50,37 +50,203 @@ enum PaymentMode {
   SPLIT
 }
 
+model Nursery {
+  id            String             @id @default(uuid())
+  name          String
+  code          String             @unique
+  city          String?
+  address       String?
+  latitude      Float?
+  longitude     Float?
+  phone         String?
+  onboardedAt   DateTime           @default(now()) @db.Date
+  plan          String             @default("FREE")
+  planPrice     Decimal            @default(0) @db.Decimal(12, 2)
+  currencyCode  String             @default("BDT")
+  userLimit     Int                @default(0)
+  plantLimit    Int                @default(0)
+  status        String             @default("ACTIVE")
+  createdAt     DateTime           @default(now())
+  features      NurseryFeature[]
+  users         User[]
+  motherPlants  MotherPlant[]
+  batches       PropagationBatch[]
+  units         PropagationUnit[]
+  inventory     PlantInventory[]
+  channelPrices PlantChannelPrice[]
+  salesChannels NurseryChannel[]
+  beds          VermicompostBed[]
+  sales         Sale[]
+  expenses      Expense[]
+  bookings      Booking[]
+  manifests     TransportManifest[]
+  leads         MarketplaceLead[]
+  careSchedules CareSchedule[]
+  diseases      DiseaseLog[]
+  auditLogs     AuditLog[]
+  zones         CameraZone[]
+  alerts        DangerAlert[]
+  treatments    TreatmentPlan[]
+  identifications PlantIdentification[]
+  notes         FeatureNote[]
+  locations     NurseryLocation[]
+  marketingMedia MarketingMedia[]
+  liveCameras   LiveCamera[]
+  roleFeatures  NurseryRoleFeature[]
+}
+
+model NurseryRoleFeature {
+  id        String  @id @default(uuid())
+  nurseryId String
+  nursery   Nursery @relation(fields: [nurseryId], references: [id], onDelete: Cascade)
+  role      Role
+  feature   String
+  enabled   Boolean @default(true)
+
+  @@unique([nurseryId, role, feature])
+  @@index([nurseryId, role])
+}
+
+model NurseryLocation {
+  id        String   @id @default(uuid())
+  nurseryId String
+  nursery   Nursery  @relation(fields: [nurseryId], references: [id], onDelete: Cascade)
+  name      String   @default("")
+  address   String
+  latitude  Float?
+  longitude Float?
+  sortOrder Int      @default(0)
+  people    User[]
+  motherPlants MotherPlant[]
+  cameras   LiveCamera[]
+}
+
+model FeatureCatalog {
+  key         String  @id
+  label       String
+  description String?
+  system      Boolean @default(false)
+  active      Boolean @default(true)
+  sortOrder   Int     @default(0)
+}
+
+model PackagePlan {
+  code       String  @id
+  label      String
+  price      Decimal @default(0) @db.Decimal(12, 2)
+  userLimit  Int     @default(2)
+  plantLimit Int     @default(50)
+  sortOrder  Int     @default(0)
+}
+
+model PlantName {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  varieties Variety[]
+}
+
+model Variety {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  plantNameId String?
+  plantName   PlantName? @relation(fields: [plantNameId], references: [id], onDelete: SetNull)
+  createdAt   DateTime   @default(now())
+
+  @@index([plantNameId])
+}
+
+model NurseryFeature {
+  id        String  @id @default(uuid())
+  nurseryId String
+  nursery   Nursery @relation(fields: [nurseryId], references: [id], onDelete: Cascade)
+  feature   String
+  enabled   Boolean @default(true)
+
+  @@unique([nurseryId, feature])
+}
+
+model UserFeature {
+  id      String  @id @default(uuid())
+  userId  String
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feature String
+  enabled Boolean @default(true)
+
+  @@unique([userId, feature])
+}
+
 model User {
-  id           String     @id @default(uuid())
-  name         String
-  email        String     @unique
-  phone        String?
-  passwordHash String
-  role         Role       @default(STAFF)
-  isActive     Boolean    @default(true)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  auditLogs    AuditLog[]
+  id              String        @id @default(uuid())
+  name            String
+  email           String        @unique
+  phone           String?
+  passwordHash    String
+  role            Role          @default(STAFF)
+  isActive        Boolean       @default(true)
+  isPlatformOwner Boolean       @default(false)
+  nurseryId       String?
+  nursery         Nursery?      @relation(fields: [nurseryId], references: [id])
+  locationId      String?
+  location        NurseryLocation? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  auditLogs       AuditLog[]
+  featureGrants   UserFeature[]
+
+  @@index([locationId])
 }
 
 model MotherPlant {
   id             String             @id @default(uuid())
-  tagNumber      String             @unique // e.g. MP-BDG-001
-  varietyName    String // Black Diamond Guava, Thai King Jamun
-  scientificName String?
-  sourceCountry  String? // Thailand, Vietnam, Malaysia
-  plantingDate   DateTime
-  plotLocation   String // Plot A, Row 3, Tree 15
-  healthStatus   String             @default("EXCELLENT")
-  scionsHarvested Int               @default(0)
-  notes          String?
+  nurseryId      String
+  nursery        Nursery            @relation(fields: [nurseryId], references: [id])
+  tagNumber           String
+  category            String             @default("FRUIT")
+  plantName           String             @default("")
+  varietyName         String
+  scientificName      String?
+  sourceCountry       String?
+  sourceVendor        String?
+  plantingDate        DateTime
+  plotLocation        String
+  plantCount          Int                @default(1)
+  locationId          String?
+  location            NurseryLocation?   @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  propagationMethods  String[]           @default([])
+  healthStatus        String             @default("HEALTHY")
+  seasonCapacity      Int?
+  listPrice           Decimal?           @db.Decimal(12, 2)
+  shareCode           String             @unique
+  videoStoredName     String?
+  scionsHarvested     Int                @default(0)
+  notes               String?
+  photos         MotherPlantPhoto[]
   propagations   PropagationBatch[]
+  phenologyLogs  PhenologyLog[]
   createdAt      DateTime           @default(now())
+
+  @@unique([nurseryId, tagNumber])
+  @@index([nurseryId])
+  @@index([locationId])
+}
+
+model MotherPlantPhoto {
+  id            String      @id @default(uuid())
+  motherPlantId String
+  motherPlant   MotherPlant @relation(fields: [motherPlantId], references: [id], onDelete: Cascade)
+  kind          String
+  storedName    String
+  createdAt     DateTime    @default(now())
+
+  @@index([motherPlantId])
 }
 
 model PropagationBatch {
   id              String            @id @default(uuid())
-  batchCode       String            @unique // BATCH-2026-BDG-01
+  nurseryId       String
+  nursery         Nursery           @relation(fields: [nurseryId], references: [id])
+  batchCode       String
   motherPlantId   String
   motherPlant     MotherPlant       @relation(fields: [motherPlantId], references: [id])
   method          PropagationMethod
@@ -92,33 +258,128 @@ model PropagationBatch {
   mistChamberDate DateTime?
   hardeningDate   DateTime?
   readyDate       DateTime?
+  shareCode       String?           @unique
   plants          PlantInventory[]
+  mistReadings    MistReading[]
+  units           PropagationUnit[]
+
+  @@unique([nurseryId, batchCode])
+  @@index([nurseryId])
+}
+
+model PropagationUnit {
+  id        String           @id @default(uuid())
+  nurseryId String
+  nursery   Nursery          @relation(fields: [nurseryId], references: [id])
+  batchId   String
+  batch     PropagationBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  serialNo  Int
+  code      String           @unique
+  status    UnitStatus       @default(GROWING)
+  createdAt DateTime         @default(now())
+
+  @@unique([batchId, serialNo])
+  @@index([nurseryId])
+  @@index([batchId])
 }
 
 model PlantInventory {
   id             String            @id @default(uuid())
-  sku            String            @unique // PLT-BDG-5X7-01
+  nurseryId      String
+  nursery        Nursery           @relation(fields: [nurseryId], references: [id])
+  sku            String
   commonName     String // Black Diamond Guava
   variety        String // Thai Hybrid
   category       String // Fruit, Ornamental, Indoor
   bagSize        String // 5x7 inch, 8x10 inch, 12 inch Tob
+  plantHeight    String?
+  plantAge       String?
+  zoneLabel      String?
   currentStock   Int               @default(0)
+  reservedQty    Int               @default(0)
+  soldQty        Int               @default(0)
+  mortalityQty   Int               @default(0)
   reorderAlert   Int               @default(15)
   costPrice      Decimal           @db.Decimal(10, 2)
   retailPrice    Decimal           @db.Decimal(10, 2)
   wholesalePrice Decimal           @db.Decimal(10, 2)
-  qrCodeData     String?
-  batchId        String?
-  batch          PropagationBatch? @relation(fields: [batchId], references: [id])
-  stockLedgers   StockLedger[]
+  qrCodeData      String?
+  shareCode       String?           @unique
+  videoStoredName String?
+  batchId         String?
+  batch           PropagationBatch? @relation(fields: [batchId], references: [id])
+  photos          PlantStockPhoto[]
+  channelPrices   PlantChannelPrice[]
+  stockLedgers    StockLedger[]
   saleItems      SaleItem[]
   careSchedules  CareSchedule[]
   createdAt      DateTime          @default(now())
+
+  @@unique([nurseryId, sku])
+  @@index([nurseryId])
+}
+
+model ChannelCatalog {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  label     String
+  system    Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model NurseryChannel {
+  id        String   @id @default(uuid())
+  nurseryId String
+  nursery   Nursery  @relation(fields: [nurseryId], references: [id], onDelete: Cascade)
+  channel   String
+  enabled   Boolean  @default(true)
+
+  @@unique([nurseryId, channel])
+  @@index([nurseryId])
+}
+
+model PlantChannelPrice {
+  id        String         @id @default(uuid())
+  nurseryId String
+  nursery   Nursery        @relation(fields: [nurseryId], references: [id])
+  plantId   String
+  plant     PlantInventory @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  channel   String
+  price     Decimal        @db.Decimal(10, 2)
+  updatedAt DateTime       @updatedAt
+
+  @@unique([plantId, channel])
+  @@index([nurseryId])
+}
+
+model MarketingMedia {
+  id         String   @id @default(uuid())
+  nurseryId  String
+  nursery    Nursery  @relation(fields: [nurseryId], references: [id], onDelete: Cascade)
+  category   String
+  kind       String
+  storedName String
+  createdAt  DateTime @default(now())
+
+  @@index([nurseryId, category])
+}
+
+model PlantStockPhoto {
+  id         String         @id @default(uuid())
+  plantId    String
+  plant      PlantInventory @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  storedName String
+  createdAt  DateTime       @default(now())
+
+  @@index([plantId])
 }
 
 model VermicompostBed {
   id            String    @id @default(uuid())
-  bedCode       String    @unique // V-BED-01
+  nurseryId     String
+  nursery       Nursery   @relation(fields: [nurseryId], references: [id])
+  bedCode       String
   rawBiomassKg  Decimal   @db.Decimal(10, 2)
   cowDungKg     Decimal   @db.Decimal(10, 2)
   speciesWorms  String    @default("Eisenia foetida")
@@ -127,7 +388,13 @@ model VermicompostBed {
   harvestedDate DateTime?
   actualYieldKg Decimal?  @db.Decimal(10, 2)
   qualityGrade  String? // Grade A (Fine Powder), Grade B
+  allocation    String? // INTERNAL_POTTING | RETAIL_PACKETS
+  costPerKg     Decimal?  @db.Decimal(10, 2)
   status        String    @default("DECOMPOSING")
+  moistureLogs  BedMoistureLog[]
+
+  @@unique([nurseryId, bedCode])
+  @@index([nurseryId])
 }
 
 model StockLedger {
@@ -144,17 +411,24 @@ model StockLedger {
 
 model Sale {
   id             String       @id @default(uuid())
-  invoiceNumber  String       @unique // INV-2026-0001
-  channel        SalesChannel @default(RETAIL_COUNTER)
+  nurseryId      String
+  nursery        Nursery      @relation(fields: [nurseryId], references: [id])
+  invoiceNumber  String
+  channel        String       @default("RETAIL_COUNTER")
   customerName   String
   customerPhone  String?
   customerCity   String?
   subTotal       Decimal      @db.Decimal(12, 2)
   discountAmount Decimal      @default(0.0) @db.Decimal(10, 2)
+  taxPct         Decimal      @default(0.0) @db.Decimal(5, 2)
+  taxAmount      Decimal      @default(0.0) @db.Decimal(10, 2)
   netTotal       Decimal      @db.Decimal(12, 2)
   paymentMode    PaymentMode  @default(CASH)
   items          SaleItem[]
   createdAt      DateTime     @default(now())
+
+  @@unique([nurseryId, invoiceNumber])
+  @@index([nurseryId])
 }
 
 model SaleItem {
@@ -170,6 +444,8 @@ model SaleItem {
 
 model CareSchedule {
   id          String         @id @default(uuid())
+  nurseryId   String
+  nursery     Nursery        @relation(fields: [nurseryId], references: [id])
   plantId     String
   plant       PlantInventory @relation(fields: [plantId], references: [id])
   taskType    String // WATERING, NPK_SPRAY, FUNGICIDE, PRUNING
@@ -178,10 +454,14 @@ model CareSchedule {
   completedOn DateTime?
   status      String         @default("PENDING")
   staffNotes  String?
+
+  @@index([nurseryId])
 }
 
 model AuditLog {
   id        String   @id @default(uuid())
+  nurseryId String?
+  nursery   Nursery? @relation(fields: [nurseryId], references: [id])
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   action    String
@@ -189,4 +469,259 @@ model AuditLog {
   entityId  String
   payload   String?
   timestamp DateTime @default(now())
+
+  @@index([nurseryId])
+}
+
+enum PhenologyKind {
+  FLOWERING
+  FRUITING
+}
+
+enum ExpenseCategory {
+  FERTILIZER
+  POLYBAGS
+  COCOPEAT
+  LABOUR
+  ELECTRICITY
+  OTHER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  FULFILLED
+  CANCELLED
+}
+
+enum ManifestStatus {
+  DRAFT
+  DISPATCHED
+  DELIVERED
+}
+
+enum LeadSource {
+  INDIAMART
+  MEESHO
+  AMAZON
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  CLOSED
+}
+
+// Flowering and fruiting cycles on exotic mother trees.
+model PhenologyLog {
+  id            String        @id @default(uuid())
+  motherPlantId String
+  motherPlant   MotherPlant   @relation(fields: [motherPlantId], references: [id])
+  kind          PhenologyKind
+  observedOn    DateTime
+  notes         String?
+  createdAt     DateTime      @default(now())
+}
+
+// Mist-chamber temperature and humidity readings (FR-MIST-01).
+model MistReading {
+  id           String           @id @default(uuid())
+  batchId      String
+  batch        PropagationBatch @relation(fields: [batchId], references: [id])
+  temperatureC Decimal          @db.Decimal(5, 2)
+  humidityPct  Decimal          @db.Decimal(5, 2)
+  recordedAt   DateTime         @default(now())
+  recordedBy   String
+}
+
+model BedMoistureLog {
+  id          String          @id @default(uuid())
+  bedId       String
+  bed         VermicompostBed @relation(fields: [bedId], references: [id])
+  moisturePct Decimal         @db.Decimal(5, 2)
+  notes       String?
+  recordedAt  DateTime        @default(now())
+}
+
+model Expense {
+  id         String          @id @default(uuid())
+  nurseryId  String
+  nursery    Nursery         @relation(fields: [nurseryId], references: [id])
+  category   ExpenseCategory
+  amount     Decimal         @db.Decimal(12, 2)
+  note       String?
+  spentOn    DateTime        @default(now())
+  recordedBy String
+  createdAt  DateTime        @default(now())
+
+  @@index([nurseryId])
+}
+
+// Advance booking for commercial orchardists.
+model Booking {
+  id            String              @id @default(uuid())
+  nurseryId     String
+  nursery       Nursery             @relation(fields: [nurseryId], references: [id])
+  customerName  String
+  customerPhone String?
+  customerCity  String?
+  variety       String
+  quantity      Int
+  neededBy      DateTime?
+  status        BookingStatus       @default(PENDING)
+  notes         String?
+  createdAt     DateTime            @default(now())
+  manifests     TransportManifest[]
+
+  @@index([nurseryId])
+}
+
+model TransportManifest {
+  id           String         @id @default(uuid())
+  nurseryId    String
+  nursery      Nursery        @relation(fields: [nurseryId], references: [id])
+  manifestNo   String
+  bookingId    String?
+  booking      Booking?       @relation(fields: [bookingId], references: [id])
+  destination  String
+  vehicleNo    String?
+  driverName   String?
+  cargoSummary String
+  status       ManifestStatus @default(DRAFT)
+  dispatchedAt DateTime?
+  createdAt    DateTime       @default(now())
+
+  @@unique([nurseryId, manifestNo])
+  @@index([nurseryId])
+}
+
+model MarketplaceLead {
+  id              String     @id @default(uuid())
+  nurseryId       String
+  nursery         Nursery    @relation(fields: [nurseryId], references: [id])
+  source          LeadSource
+  contactName     String
+  phone           String?
+  productInterest String
+  quantity        Int        @default(1)
+  status          LeadStatus @default(NEW)
+  notes           String?
+  createdAt       DateTime   @default(now())
+
+  @@index([nurseryId])
+}
+
+// Disease diagnosis and treatment resolution (care domain).
+model DiseaseLog {
+  id          String    @id @default(uuid())
+  nurseryId   String
+  nursery     Nursery   @relation(fields: [nurseryId], references: [id])
+  subject     String
+  plantId     String?
+  diagnosis   String
+  treatment   String?
+  status      String    @default("OPEN")
+  observedOn  DateTime  @default(now())
+  resolvedOn  DateTime?
+  staffNotes  String?
+
+  @@index([nurseryId])
+}
+
+model LiveCamera {
+  id            String          @id @default(uuid())
+  nurseryId     String
+  nursery       Nursery         @relation(fields: [nurseryId], references: [id], onDelete: Cascade)
+  locationId    String
+  location      NurseryLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  name          String
+  sortOrder     Int             @default(0)
+  alertEnabled    Boolean         @default(false)
+  alertAlways     Boolean         @default(false)
+  alertConfigured Boolean         @default(false)
+  alertWindows    Json            @default("[]")
+  alertRaisedOn   String?
+  createdAt     DateTime        @default(now())
+
+  @@index([nurseryId, locationId])
+}
+
+model CameraZone {
+  id        String        @id @default(uuid())
+  nurseryId String
+  nursery   Nursery       @relation(fields: [nurseryId], references: [id])
+  name      String
+  location  String
+  status    String        @default("ONLINE")
+  alerts    DangerAlert[]
+  createdAt DateTime      @default(now())
+
+  @@index([nurseryId])
+}
+
+model DangerAlert {
+  id         String      @id @default(uuid())
+  nurseryId  String
+  nursery    Nursery     @relation(fields: [nurseryId], references: [id])
+  zoneId     String?
+  zone       CameraZone? @relation(fields: [zoneId], references: [id])
+  caseNo     String
+  kind       String
+  severity   String      @default("HIGH")
+  message    String
+  history    String?
+  closeNotes String?
+  photoName  String?
+  videoName  String?
+  cameraId   String?
+  cameraName String?
+  detectKind String?
+  status     String      @default("OPEN")
+  raisedAt   DateTime    @default(now())
+  ackAt      DateTime?
+  closedAt   DateTime?
+
+  @@unique([nurseryId, caseNo])
+  @@index([nurseryId])
+}
+
+model TreatmentPlan {
+  id        String   @id @default(uuid())
+  nurseryId String
+  nursery   Nursery  @relation(fields: [nurseryId], references: [id])
+  plantName String
+  problem   String
+  product   String
+  dose      String
+  method    String
+  status    String   @default("PLANNED")
+  notes     String?
+  treatedOn DateTime @default(now())
+
+  @@index([nurseryId])
+}
+
+model PlantIdentification {
+  id         String   @id @default(uuid())
+  nurseryId  String
+  nursery    Nursery  @relation(fields: [nurseryId], references: [id])
+  traits     String
+  matchName  String
+  confidence Int
+  confirmed  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([nurseryId])
+}
+
+model FeatureNote {
+  id        String   @id @default(uuid())
+  nurseryId String
+  nursery   Nursery  @relation(fields: [nurseryId], references: [id])
+  feature   String
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([nurseryId])
 }

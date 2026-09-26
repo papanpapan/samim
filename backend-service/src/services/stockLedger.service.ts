@@ -1,7 +1,30 @@
-import { Prisma } from '@prisma/client';
 import { ApiError } from '../utils/apiError';
 
-type Tx = Prisma.TransactionClient;
+type Tx = {
+  plantInventory: {
+    findUnique: (args: { where: { id: string } }) => Promise<{ currentStock: number; sku: string; reservedQty: number } | null>;
+    update: (args: {
+      where: { id: string };
+      data: {
+        currentStock: number;
+        soldQty?: { increment: number };
+        mortalityQty?: { increment: number };
+      };
+    }) => Promise<unknown>;
+  };
+  stockLedger: {
+    create: (args: {
+      data: {
+        plantId: string;
+        deltaQty: number;
+        closingQty: number;
+        actionType: string;
+        referenceNo?: string;
+        recordedBy: string;
+      };
+    }) => Promise<unknown>;
+  };
+};
 
 export type StockAction =
   | 'SALE'
@@ -36,15 +59,20 @@ export async function applyStockDelta({
   }
 
   const closingQty = plant.currentStock + deltaQty;
-  if (closingQty < 0) {
+  if (closingQty < 0 || (actionType === 'SALE' && closingQty < plant.reservedQty)) {
+    const available = Math.max(0, plant.currentStock - plant.reservedQty);
     throw ApiError.conflict(
-      `Insufficient available stock for ${plant.sku}. In stock: ${plant.currentStock}, requested change: ${deltaQty}`,
+      `Insufficient available stock for ${plant.sku}. Available: ${available}, reserved: ${plant.reservedQty}, requested change: ${deltaQty}`,
     );
   }
 
   const updated = await tx.plantInventory.update({
     where: { id: plantId },
-    data: { currentStock: closingQty },
+    data: {
+      currentStock: closingQty,
+      ...(actionType === 'SALE' && deltaQty < 0 ? { soldQty: { increment: Math.abs(deltaQty) } } : {}),
+      ...(actionType === 'MORTALITY' && deltaQty < 0 ? { mortalityQty: { increment: Math.abs(deltaQty) } } : {}),
+    },
   });
 
   await tx.stockLedger.create({

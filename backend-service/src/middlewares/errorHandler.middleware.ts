@@ -38,6 +38,9 @@ export function errorHandler(
     }
   }
 
-  logger.error('Unhandled error', { error: err instanceof Error ? err.message : err });
+  logger.error('Unhandled error', {
+    error: err instanceof Error ? err.message : err,
+    stack: err instanceof Error ? err.stack : undefined,
+  });
   res.status(500).json({ success: false, message: 'Internal server error' });
 }

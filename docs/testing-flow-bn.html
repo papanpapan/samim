@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>সাবা নার্সারি — পুরো টেস্ট গাইড</title>
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; font-family: "Noto Sans Bengali", "Segoe UI", sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.65; }
+    main { max-width: 46rem; margin: 0 auto; padding: 1.25rem; }
+    h1 { font-size: 1.7rem; line-height: 1.3; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.2rem; margin-top: 2rem; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1rem 1.1rem; margin: 0.75rem 0; }
+    code, .mono { font-family: Consolas, monospace; font-size: 0.92em; }
+    ol { padding-left: 1.2rem; }
+    li { margin: 0.35rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    th, td { text-align: left; border-bottom: 1px solid #e2e8f0; padding: 0.45rem 0.3rem; vertical-align: top; }
+    .note { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.8rem; padding: 0.8rem 1rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>সাবা নার্সারি — পুরো সিস্টেম কীভাবে টেস্ট করবেন</h1>
+  <p>ফোন ও কম্পিউটার দুটোতেই চলে। ফোনে ব্রাউজার খুললে বাঁ পাশের মেনু তিন লাইনের বোতামে থাকে। বিক্রয় সম্পূর্ণ করবেন না — স্টক কমে যায়।</p>
+
+  <h2>১. চালু করা</h2>
+  <div class="card">
+    <ol>
+      <li>PostgreSQL চালু থাকবে। ডাটাবেস <span class="mono">saba_nursery</span>, ইউজার <span class="mono">saba</span>।</li>
+      <li>ব্যাকএন্ড ফোল্ডারে <span class="mono">npm run dev</span>। ঠিকানা <span class="mono">http://localhost:4000/health</span> — <span class="mono">ok</span> দেখাবে।</li>
+      <li>ক্লায়েন্ট ফোল্ডারে <span class="mono">npm run dev</span>। ব্রাউজারে <span class="mono">http://localhost:5173</span>।</li>
+      <li>ফোন থেকে দেখতে একই Wi‑Fi-তে কম্পিউটারের আইপি দিয়ে <span class="mono">http://কম্পিউটার-আইপি:5173</span> খুলুন।</li>
+    </ol>
+  </div>
+
+  <h2>২. কে কী পারে</h2>
+  <table>
+    <thead><tr><th>ভূমিকা</th><th>কাজ</th></tr></thead>
+    <tbody>
+      <tr><td>সুপার অ্যাডমিন</td><td>সব নার্সারি। ফিচার যোগ, নাম বদল, সরানো। কোন নার্সারি কোন ফিচার পাবে। নার্সারি বন্ধ বা চালু।</td></tr>
+      <tr><td>নার্সারি অ্যাডমিন</td><td>শুধু নিজের নার্সারি। কে স্টাফ, ক্যাশিয়ার, ম্যানেজার বা অ্যাডমিন হবে সেটা ঠিক করেন।</td></tr>
+      <tr><td>ম্যানেজার</td><td>ক্ষেত, বিক্রয়, সরবরাহ, হিসাব। ইউজার তৈরি করেন না।</td></tr>
+      <tr><td>স্টাফ</td><td>ক্ষেতের কাজ। বিক্রয় ও টাকার হিসাব নয়।</td></tr>
+      <tr><td>ক্যাশিয়ার</td><td>বিক্রয় ও সরবরাহ। ক্ষেতের লেখা নয়।</td></tr>
+    </tbody>
+  </table>
+  <p class="note">ফিচার বন্ধ থাকলে ভূমিকা থাকলেও সেই পাতা খোলে না। স্টাফকে বিক্রয় টিক দিলেও স্টাফ বিক্রি করতে পারে না।</p>
+
+  <h2>৩. লগইন</h2>
+  <table>
+    <thead><tr><th>ভূমিকা</th><th>ইমেল</th><th>পাসওয়ার্ড</th></tr></thead>
+    <tbody>
+      <tr><td>সুপার অ্যাডমিন</td><td>admin@sabanursery.com</td><td>Admin@12345</td></tr>
+      <tr><td>ম্যানেজার</td><td>manager@sabanursery.com</td><td>Manager@123</td></tr>
+      <tr><td>ক্যাশিয়ার</td><td>cashier@sabanursery.com</td><td>Cashier@123</td></tr>
+      <tr><td>স্টাফ</td><td>staff@sabanursery.com</td><td>Staff@123</td></tr>
+    </tbody>
+  </table>
+
+  <h2>৪. সুপার অ্যাডমিন — নার্সারি ও ফিচার</h2>
+  <div class="card">
+    <ol>
+      <li>অ্যাডমিন দিয়ে ঢুকুন। <strong>Nurseries</strong> পাতা খুলবে।</li>
+      <li>উপরে ফিচার তালিকা। নাম বদলে Save। Remove চাপলে তৈরি করা ফিচার মুছে যায়। আগে থেকে থাকা ফিচার লুকায়, Restore দিয়ে ফেরে।</li>
+      <li>নতুন ফিচার: কোড যেমন <span class="mono">SOIL_TEST</span>, নাম, তারপর যোগ। সেই ফিচার নার্সারিকে দিলে মেনুতে নোট পাতা আসে।</li>
+      <li>নতুন নার্সারি: নাম, কোড, শহর, প্রথম অ্যাডমিনের আলাদা ইমেল ও পাসওয়ার্ড। কোন ফিচার চালু থাকবে টিক দিন।</li>
+      <li>People-এ মানুষ যোগ হলে সে স্টাফ। ভূমিকা বদল নার্সারি অ্যাডমিন করে।</li>
+      <li>Open চাপলে সেই নার্সারির ভিতরে ঢোকেন। উপরে নার্সারির নাম থাকে।</li>
+      <li>Suspend চাপলে সেই নার্সারির মানুষ ঢুকতে পারে না। আপনি পারবেন।</li>
+    </ol>
+  </div>
+
+  <h2>৫. নার্সারি অ্যাডমিন — ভূমিকা</h2>
+  <div class="card">
+    <ol>
+      <li>সেই নার্সারির অ্যাডমিন দিয়ে ঢুকুন।</li>
+      <li>Admin পাতায় ব্যবহারকারীর পাশে ভূমিকা বদলান: Staff, Cashier, Manager, Admin।</li>
+      <li>লগ আউট করে সেই ইমেলে ঢুকে দেখুন মেনু ভূমিকা অনুযায়ী কমেছে কি না।</li>
+    </ol>
+  </div>
+
+  <h2>৬. প্রতিটি কাজের টেস্ট</h2>
+  <div class="card">
+    <ol>
+      <li><strong>ড্যাশবোর্ড</strong> — সংখ্যা দেখা। স্টাফ টাকার কার্ড দেখে না।</li>
+      <li><strong>মাতৃ গাছ</strong> — ট্যাগ, জাত, জায়গা সেভ। আবার খুলে দেখা।</li>
+      <li><strong>চারা</strong> — ব্যাচ, ধাপ এগানো।</li>
+      <li><strong>মজুদ</strong> — এসকিউ, দাম, কিউআর। কম স্টক সতর্কতা।</li>
+      <li><strong>বিক্রয়</strong> — কার্টে তোলা পর্যন্ত। Complete Sale চাপবেন না।</li>
+      <li><strong>কেঁচো সার</strong> — বেড ও আর্দ্রতা।</li>
+      <li><strong>যত্ন</strong> — জল বা স্প্রের তারিখ।</li>
+      <li><strong>সরবরাহ</strong> — বুকিং, চালান, লিড। বাতিল না করে নতুন টেস্ট সারি রাখবেন না, আগের ডেমো সারি আছে।</li>
+      <li><strong>হিসাব</strong> — আয়, খরচ, লাভ। নতুন খরচ সেভ না করাই ভালো, আগের এক টাকার ডেমো আছে।</li>
+      <li><strong>বিপদ সতর্কতা</strong> — জোন যোগ, আগুন বা রোগের সতর্কতা তুলুন, Seen, তারপর Close।</li>
+      <li><strong>কণ্ঠ ডেস্ক</strong> — বলুন বা লিখুন «পেয়ারা কত স্টক» অথবা «আজ কত বিক্রি»। উত্তর বড় অক্ষরে আসে। ফোনের ক্রোমে মাইক ভালো কাজ করে।</li>
+      <li><strong>চিকিৎসা</strong> — গাছ, সমস্যা, ওষুধ, মাত্রা সেভ। সম্পন্ন চাপুন।</li>
+      <li><strong>গাছ চেনা</strong> — পাতার ছবি তুলুন। রং ছবি থেকে বসে। আকার ও কিনারা মিলিয়ে নাম বলুন। এটা নার্সারির জাতের বই, যেকোনো বনের গাছের নাম নয়।</li>
+      <li><strong>ভাষা</strong> — উপরে Language থেকে বাংলা। লেখা বদলায়। জাতের ইংরেজি নাম একই থাকে।</li>
+    </ol>
+  </div>
+
+  <h2>৭. ফোন</h2>
+  <div class="card">
+    <ol>
+      <li>স্ক্রিন সরু করুন বা ফোনে খুলুন।</li>
+      <li>মেনু বোতামে তালিকা আসে, একটি লিঙ্কে চাপলে মেনু বন্ধ হয়।</li>
+      <li>টেবিল ডানে সরে। বোতাম আঙুলে চাপার মতো বড়।</li>
+      <li>গাছ চেনায় ক্যামেরা খোলে। কণ্ঠ ডেস্কে মাইকের অনুমতি দিন।</li>
+    </ol>
+  </div>
+
+  <h2>৮. যা এখনও লাইভ যন্ত্র নয়</h2>
+  <p>সিসিটিভি স্ক্রিন সরাসরি ক্যামেরার ভিডিও দেখায় না। জোন ও বিপদ সতর্কতা খাতা। পাতা চেনা এই নার্সারির জাতের তালিকা মেলানো। মার্কেটপ্লেস, এসএমএস, নাইটলি ব্যাকআপ ও ব্লুটুথ প্রিন্টার এখনও যুক্ত নয়।</p>
+</main>
+</body>
+</html>

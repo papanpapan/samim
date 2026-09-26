@@ -1,0 +1,17 @@
+---
+description: SN-ERMS TypeScript standards for the React client and Express API
+alwaysApply: true
+---
+
+# SN-ERMS
+
+`client-app` is React 18 + Vite + Tailwind. `backend-service` is Express + Prisma + PostgreSQL. Keep TypeScript `strict`. Do not add `any` or `@ts-ignore`.
+
+- Validate Express bodies with Zod through `validate()` on the route.
+- Hash passwords with bcrypt. Sign JWT from `env`. Do not invent a refresh token unless asked.
+- Uploads use Multer with an allow-list and a byte limit. Do not send large media as JSON.
+- API calls go through `client-app/src/api/client.ts`. User-facing copy goes through i18next (`en` fallback, and `bn` when you add a key).
+- API enum and feature codes stay English. Translate labels only.
+- Do not cache authenticated `/api/v1` responses in the service worker.
+- Do not commit `.env` or `backend-service/uploads/`.
+- Local dev on this Windows PC: `npm run dev` in `backend-service` and `client-app`. Do not run `.cursor/install.sh` or `.cursor/start.sh` here.

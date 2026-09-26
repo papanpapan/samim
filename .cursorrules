@@ -1,0 +1,29 @@
+# SN-ERMS
+
+Two TypeScript apps: `client-app` (React 18, Vite, Tailwind, Axios, React Router, i18next, PWA) and `backend-service` (Express, Prisma, PostgreSQL, Zod, JWT). No root application code. Do not commit `.env` or `backend-service/uploads/`.
+
+## Shared
+
+- Keep `strict` TypeScript. Do not add `any`, `@ts-ignore`, or silent casts to skip a check.
+- Match existing names and files. Do not add a new library when the repo already has one.
+- Display text goes through i18next. Codes posted to the API stay English: category, health, method, stage, channel, feature keys.
+- Do not commit, push, or change git config unless asked.
+- This PC is Windows. Start the API and the screen with `npm run dev`. Do not run `.cursor/install.sh` or `.cursor/start.sh` locally. Those scripts are for a Linux cloud agent.
+
+## Guide
+
+Samim wants to follow the code. Before an edit, say in Bangla which files will change and why. After the edit, say for each file what changed and what he will see. Cite the changed lines. Do not touch unrelated files. Warn before a change that can break login, stock, or a live nursery.
+
+## Backend
+
+- Validate every request body with Zod in the route via `validate()`, before the controller.
+- Hash passwords with bcrypt and `env.BCRYPT_SALT_ROUNDS`. Sign JWT with `env.JWT_SECRET` and `env.JWT_EXPIRES_IN`. Do not add a refresh-token flow unless asked.
+- New uploads use Multer disk storage, an allow-list of MIME or extension, and an explicit byte limit. Do not put large files in JSON.
+- Log unexpected failures with `logger`. Do not log passwords, tokens, or full request bodies.
+- Tenant data goes through the existing Prisma tenant filter. Set `nurseryId` explicitly on public writes. Do not call `writeAudit` from a public route.
+
+## Frontend
+
+- Call the API through `src/api/client.ts`. The interceptor attaches the JWT and nursery header. Show failures with `apiErrorMessage`.
+- New UI strings need a key in `en.json` and `bn.json`. Fallback language is English.
+- Authenticated `/api/v1` responses are not cached by the service worker. Media under `/api/uploads/` may be cached.

@@ -7,6 +7,21 @@ export const WHOLESALE_TIERS = [
   { minQty: 0, discountPct: 0 },
 ];
 
+// Input rates used to estimate vermicompost cost per kilogram after sieving.
+export const COMPOST_INPUT_RATES = {
+  cowDungPerKg: 2,
+  biomassPerKg: 1,
+};
+
+export function compostCostPerKg(cowDungKg: number, biomassKg: number, yieldKg: number): number {
+  if (yieldKg <= 0) return 0;
+  const cost = cowDungKg * COMPOST_INPUT_RATES.cowDungPerKg + biomassKg * COMPOST_INPUT_RATES.biomassPerKg;
+  return Number((cost / yieldKg).toFixed(2));
+}
+
+// Display-only UPI id for the counter QR. Replace with the nursery VPA in production.
+export const NURSERY_UPI_VPA = 'sabanursery@upi';
+
 export function wholesaleDiscountPct(totalQty: number): number {
   const tier = WHOLESALE_TIERS.find((t) => totalQty >= t.minQty);
   return tier ? tier.discountPct : 0;

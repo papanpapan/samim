@@ -1,10 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { AccessibilityProvider } from './a11y/AccessibilityProvider';
+import './i18n';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <AccessibilityProvider>
+      <App />
+    </AccessibilityProvider>
   </React.StrictMode>,
 );

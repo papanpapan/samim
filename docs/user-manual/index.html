@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Saba Nursery ERMS — User Manual</title>
+  <style>
+    :root {
+      --ink: #1e293b;
+      --muted: #475569;
+      --line: #e2e8f0;
+      --green: #15803d;
+      --paper: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font: 16px/1.55 "Segoe UI", system-ui, sans-serif;
+    }
+    header.cover {
+      background: #0f172a;
+      color: white;
+      padding: 64px 24px 48px;
+    }
+    header.cover .wrap, main { max-width: 980px; margin: 0 auto; }
+    .kicker { letter-spacing: 0.18em; text-transform: uppercase; font-size: 12px; color: #86efac; margin: 0 0 8px; }
+    h1 { font-size: 40px; line-height: 1.15; margin: 0 0 12px; }
+    .lede { color: #cbd5e1; max-width: 40rem; margin: 0; }
+    main { padding: 8px 24px 80px; }
+    nav.toc {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin: -28px auto 28px;
+      position: relative;
+    }
+    nav.toc ol { margin: 8px 0 0; padding-left: 20px; columns: 2; }
+    nav.toc a { color: var(--green); text-decoration: none; }
+    nav.toc a:hover { text-decoration: underline; }
+    section {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 28px;
+      margin: 20px 0;
+    }
+    h2 { margin: 0 0 8px; font-size: 26px; }
+    h3 { margin: 22px 0 8px; font-size: 18px; }
+    p, li { color: var(--ink); }
+    .bn { background: #f0fdf4; border-left: 4px solid var(--green); padding: 12px 14px; border-radius: 8px; margin: 12px 0 16px; }
+    figure { margin: 18px 0 0; }
+    figure img { width: 100%; border: 1px solid var(--line); border-radius: 12px; display: block; }
+    figcaption { color: var(--muted); font-size: 14px; margin-top: 8px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 15px; }
+    th, td { text-align: left; border-bottom: 1px solid var(--line); padding: 8px 10px; vertical-align: top; }
+    th { font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    code { background: #f1f5f9; padding: 1px 6px; border-radius: 6px; font-size: 0.92em; }
+    .yes { color: var(--green); font-weight: 700; }
+    .no { color: #94a3b8; }
+    @media print {
+      body { background: white; }
+      header.cover { break-after: page; }
+      section { break-inside: avoid; border: none; padding: 0 0 24px; }
+      nav.toc { border: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+    @media (max-width: 700px) {
+      nav.toc ol { columns: 1; }
+      h1 { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="cover">
+    <div class="wrap">
+      <p class="kicker">SN-ERMS v3.0</p>
+      <h1>Saba Nursery<br />User Manual</h1>
+      <p class="lede">How to sign in, run the nursery floor, sell at the counter, and close the books. Screenshots are from the live system.</p>
+    </div>
+  </header>
+
+  <main>
+    <nav class="toc">
+      <strong>Contents</strong>
+      <ol>
+        <li><a href="#start">Sign in</a></li>
+        <li><a href="#language">Language, text size, and voice</a></li>
+        <li><a href="#roles">Who can do what</a></li>
+        <li><a href="#dashboard">Dashboard</a></li>
+        <li><a href="#mothers">Mother plants</a></li>
+        <li><a href="#propagation">Propagation</a></li>
+        <li><a href="#inventory">Inventory</a></li>
+        <li><a href="#pos">Sales counter</a></li>
+        <li><a href="#vermi">Vermicompost</a></li>
+        <li><a href="#care">Care</a></li>
+        <li><a href="#distribution">Distribution</a></li>
+        <li><a href="#accounts">Accounts</a></li>
+        <li><a href="#admin">Admin</a></li>
+        <li><a href="#day">A working day</a></li>
+      </ol>
+    </nav>
+
+    <section id="start">
+      <h2>1. Sign in</h2>
+      <div class="bn">
+        লগইন পেজে নিচের <strong>Demo access</strong> থেকে নিজের রোল চাপুন (Admin, Manager, Staff, Cashier)। ইমেল ও পাসওয়ার্ড নিজে থেকে বসে যাবে। তারপর সবুজ <strong>Sign in</strong> চাপুন। কাজ শেষে উপরে <strong>Logout</strong>।
+      </div>
+      <ol>
+        <li>Open the nursery app and wait for <strong>Welcome back</strong>.</li>
+        <li>Under <strong>Demo access</strong>, press your role. The email and password fill in for you.</li>
+        <li>Press <strong>Sign in</strong>.</li>
+        <li>When you finish, press <strong>Logout</strong> at the top right.</li>
+      </ol>
+      <p>These four accounts are for this nursery system. Change them before a public server.</p>
+      <table>
+        <thead><tr><th>Role</th><th>Name on screen</th><th>Email</th><th>Password</th></tr></thead>
+        <tbody>
+          <tr><td>Admin</td><td>Samim Molla</td><td><code>admin@sabanursery.com</code></td><td><code>Admin@12345</code></td></tr>
+          <tr><td>Manager</td><td>Nursery Manager</td><td><code>manager@sabanursery.com</code></td><td><code>Manager@123</code></td></tr>
+          <tr><td>Staff</td><td>Field Horticulturist</td><td><code>staff@sabanursery.com</code></td><td><code>Staff@123</code></td></tr>
+          <tr><td>Cashier</td><td>Counter Cashier</td><td><code>cashier@sabanursery.com</code></td><td><code>Cashier@123</code></td></tr>
+        </tbody>
+      </table>
+      <figure>
+        <img src="screenshots/01-login.png" alt="Sign-in screen with four demo role buttons" />
+        <figcaption>Sign-in screen. Pick a role, then press Sign in.</figcaption>
+      </figure>
+    </section>
+
+    <section id="language">
+      <h2>2. Language, text size, and voice</h2>
+      <div class="bn">
+        উপরে <strong>English</strong> বাটনে বাংলা, হিন্দি, থাই, ভিয়েতনামি, তামিল, মারাঠি, মালয়ালম, চীনা, বা জাপানি বেছে নিন। <strong>Reading and display</strong> থেকে লেখা বড় করা, হাই কনট্রাস্ট, বা চোখের আরামের রং চালু করা যায়। স্পিকার আইকনে চাপলে সেই অংশ পড়া হয়।
+      </div>
+      <p>These controls sit at the top of every page, including the sign-in screen.</p>
+      <ul>
+        <li><strong>Language</strong> switches labels. Plant names, SKU codes, and amounts stay as they were entered.</li>
+        <li><strong>Text size</strong>: Normal, Large, or Extra large.</li>
+        <li><strong>Appearance</strong>: Light, High contrast, or Eye care.</li>
+        <li><strong>Voice assist</strong>: when the box is ticked, pointing at a control reads it aloud. The speaker button next to a field reads that field on demand.</li>
+      </ul>
+      <p>Spoken English works with the voices already on Windows. Spoken Bangla needs a Bangla voice installed on that computer.</p>
+      <figure>
+        <img src="screenshots/03-language.png" alt="Language menu open on the dashboard" />
+        <figcaption>Ten languages. English is selected.</figcaption>
+      </figure>
+      <figure>
+        <img src="screenshots/04-display.png" alt="Reading and display panel" />
+        <figcaption>Text size, appearance, and voice assist.</figcaption>
+      </figure>
+    </section>
+
+    <section id="roles">
+      <h2>3. Who can do what</h2>
+      <div class="bn">
+        স্টাফ মাঠের কাজ করে — গাছ, ব্যাচ, মজুদ ঠিক, কেঁচো সার, পরিচর্যা। বিক্রি ও টাকার হিসাব স্টাফ দেখে না। ক্যাশিয়ার কাউন্টার ও ডেলিভারি করে। ম্যানেজার মাঠ, বিক্রি ও হিসাব দেখে, কিন্তু নতুন ইউজার বানাতে পারে না। অ্যাডমিন সব পারে।
+      </div>
+      <p>The left menu changes with the person who signed in. A hidden page cannot be opened by typing the address; the app sends that person back to the dashboard.</p>
+      <table>
+        <thead>
+          <tr><th>Work</th><th>Admin</th><th>Manager</th><th>Staff</th><th>Cashier</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>See mother plants, batches, stock, compost, care</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><td>Register a mother plant</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
+          <tr><td>Log scions, flowering, and fruiting</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td></tr>
+          <tr><td>Start a batch and log mist climate</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td></tr>
+          <tr><td>Mark a batch ready and create stock</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
+          <tr><td>Adjust stock counts</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td></tr>
+          <tr><td>Sell at the counter</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td></tr>
+          <tr><td>Bookings, transport, marketplace leads</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td></tr>
+          <tr><td>Record expenses and see profit</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
+          <tr><td>Create users and read the audit log</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="dashboard">
+      <h2>4. Dashboard</h2>
+      <div class="bn">
+        ড্যাশবোর্ডে মা গাছ, চলমান ব্যাচ, বিক্রির মজুদ, কম স্টক, আজকের পরিচর্যা, এবং চালনি-দেওয়ার মতো কেঁচো সারের বেড দেখা যায়। বিক্রি, লাভ, বুকিং ও লিড শুধু অ্যাডমিন, ম্যানেজার ও ক্যাশিয়ার দেখে। স্টাফ টাকার কার্ড দেখে না।
+      </div>
+      <p>Admin sees production and money together. In this nursery the board currently shows 4 mother plants, 1 batch still on the books, 1 ready SKU with 459 plants, 1 bed ready to sieve, and sales of ৳180.</p>
+      <ul>
+        <li><strong>Potential profit</strong> is the retail price of plants still in stock, minus what they cost. It is not the cash already collected.</li>
+        <li><strong>Inventory valuation</strong> splits that into cost value, retail value, and projected margin.</li>
+        <li><strong>Care due</strong> counts tasks scheduled for today or earlier that are not marked done.</li>
+        <li><strong>Open bookings</strong> counts orchard orders that are still pending or confirmed.</li>
+      </ul>
+      <figure>
+        <img src="screenshots/02-dashboard.png" alt="Admin operations dashboard" />
+        <figcaption>Admin dashboard. Sales, bookings, and profit are visible.</figcaption>
+      </figure>
+      <figure>
+        <img src="screenshots/14-staff-dashboard.png" alt="Staff dashboard without money cards" />
+        <figcaption>Staff dashboard. The menu stops at Care. Sales and profit are hidden.</figcaption>
+      </figure>
+    </section>
+
+    <section id="mothers">
+      <h2>5. Mother plants</h2>
+      <div class="bn">
+        প্রতিটি মা গাছের ট্যাগ, জাত, দেশ, প্লট, ব্যাচ ও কাটা সায়ন এখানে থাকে। অ্যাডমিন ও ম্যানেজার <strong>Add Mother Plant</strong> দিয়ে নতুন গাছ যোগ করে। স্টাফ নতুন গাছ যোগ করতে পারে না, কিন্তু <strong>Log scion</strong>, <strong>Cycle</strong> ও <strong>Metal tag</strong> ব্যবহার করতে পারে।
+      </div>
+      <h3>Register a tree</h3>
+      <p>Admin or Manager presses <strong>Add Mother Plant</strong>, then fills tag number, variety, source country, planting date, and plot. <strong>Save &amp; Generate Tag</strong> stores the tree.</p>
+      <h3>Day-to-day buttons on each row</h3>
+      <ul>
+        <li><strong>Metal tag</strong> opens a printable tag with a QR code. Anyone who can open this page can print it.</li>
+        <li><strong>Cycle</strong> records flowering or fruiting, with the date and a note.</li>
+        <li><strong>Log scion</strong> records how many stems were cut from that tree.</li>
+      </ul>
+      <figure>
+        <img src="screenshots/05-mother-plants.png" alt="Mother plant registry with add button" />
+        <figcaption>Admin view. Add Mother Plant is available.</figcaption>
+      </figure>
+      <figure>
+        <img src="screenshots/15-staff-mothers.png" alt="Staff mother plant list without the add button" />
+        <figcaption>Staff view of the same list. There is no Add Mother Plant button.</figcaption>
+      </figure>
+    </section>
+
+    <section id="propagation">
+      <h2>6. Propagation</h2>
+      <div class="bn">
+        নতুন চারা একটি ব্যাচ হিসেবে শুরু হয়। ধাপ: শুরু → মিস্ট চেম্বার → হার্ডেনিং → বিক্রির জন্য প্রস্তুত। স্টাফ ব্যাচ শুরু করতে ও আবহাওয়া লিখতে পারে। বিক্রির মজুদে তোলার কাজ ম্যানেজার বা অ্যাডমিন করে।
+      </div>
+      <ol>
+        <li>Press <strong>New Batch</strong>. Choose the mother plant, the method, and how many plants you started.</li>
+        <li>Methods are air layering, softwood grafting, cleft grafting, patch budding, cutting, and seedling.</li>
+        <li>Move the batch from <strong>Mist chamber</strong> to <strong>Hardening</strong> as the plants grow. Enter how many plants are still alive.</li>
+        <li>On <strong>Climate</strong>, log temperature (°C) and humidity (%) for the mist chamber. The useful band is about 20–35°C and 70–95% humidity.</li>
+        <li>When the plants are hardened, a manager presses <strong>Mark Ready</strong>, fills the selling name, bag size, and prices, then presses <strong>Create Stock &amp; QR</strong>.</li>
+      </ol>
+      <p>The batch already in the system, <code>BATCH-2026-BDG-001</code>, is ready for sale, so the row only offers <strong>Climate</strong>.</p>
+      <figure>
+        <img src="screenshots/06-propagation.png" alt="Propagation hub with one ready batch" />
+        <figcaption>Black Diamond Guava batch: 460 of 500 plants survived and are ready for sale.</figcaption>
+      </figure>
+    </section>
+
+    <section id="inventory">
+      <h2>7. Plant inventory</h2>
+      <div class="bn">
+        বিক্রির জন্য তৈরি গাছ এখানে SKU দিয়ে থাকে। খুঁজতে নাম বা SKU লিখে <strong>Search</strong> চাপুন। <strong>QR / Barcode</strong> লেবেল ছাপে। মজুদ কমাতে বা বাড়াতে <strong>Adjust</strong> — কমে গেলে মাইনাস সংখ্যা, শূন্য সেভ হয় না।
+      </div>
+      <p>Each row shows bag size, stock, retail price, and wholesale price. Adjust stock with one of three reasons:</p>
+      <ul>
+        <li><strong>Mortality</strong> — plants died. Use a negative number.</li>
+        <li><strong>Count adjustment</strong> — the physical count did not match the screen.</li>
+        <li><strong>Purchase</strong> — plants bought in. Use a positive number.</li>
+      </ul>
+      <p>Staff, Manager, and Admin can adjust. Cashier can look up a plant and print a label, and cannot change the count.</p>
+      <figure>
+        <img src="screenshots/07-inventory.png" alt="Plant inventory row for Black Diamond Guava" />
+        <figcaption>SKU PLT-BDG-5X7-01, bag 5×7 inch, 459 in stock, retail ৳180, wholesale ৳120.</figcaption>
+      </figure>
+    </section>
+
+    <section id="pos">
+      <h2>8. Sales counter</h2>
+      <div class="bn">
+        বিক্রি শুধু অ্যাডমিন, ম্যানেজার ও ক্যাশিয়ার করে। SKU স্ক্যান বা টাইপ করে <strong>Add</strong> চাপুন। কীবোর্ডে <strong>F2</strong> স্ক্যান বক্সে ফিরিয়ে আনে। পেমেন্ট UPI হলে নিচে QR আসে। <strong>Complete Sale &amp; Print</strong> চাপলে স্টক কমে এবং রসিদ সেভ হয়।
+      </div>
+      <ol>
+        <li>Open <strong>Sales POS</strong>.</li>
+        <li>Scan the plant tag, or type the SKU and press <strong>Add</strong>. Press <strong>F2</strong> any time to jump back to the scan box.</li>
+        <li>Set the quantity. Press the red remove mark to take a line off the cart.</li>
+        <li>Choose the channel: Retail Counter, Wholesale Orchardist, IndiaMART, or Meesho.</li>
+        <li>Type the customer name. Phone is optional.</li>
+        <li>Choose Cash, UPI (PhonePe/GPay), or Bank NEFT/IMPS.</li>
+        <li>Check the net total, then press <strong>Complete Sale &amp; Print</strong>.</li>
+      </ol>
+      <p>On <strong>Wholesale Orchardist</strong>, the discount is automatic: 10% from 100 plants in the cart, 20% from 500 plants. Retail has no quantity discount.</p>
+      <p>UPI shows a QR for the net amount. The nursery VPA on that code is <code>sabanursery@upi</code>. The cart in the admin picture below was only for the screenshot. The sale was not completed, so stock stayed at 459.</p>
+      <figure>
+        <img src="screenshots/08-pos.png" alt="Sales POS with one plant and a UPI QR" />
+        <figcaption>One Black Diamond Guava at ৳180, paid by UPI. Complete Sale sits under the QR.</figcaption>
+      </figure>
+      <figure>
+        <img src="screenshots/16-cashier-pos.png" alt="Cashier sales screen with an empty cart" />
+        <figcaption>Cashier counter, cart empty, cash selected. Accounts and Admin are not in this menu.</figcaption>
+      </figure>
+    </section>
+
+    <section id="vermi">
+      <h2>9. Vermicompost</h2>
+      <div class="bn">
+        প্রতিটি বেডে গোবর, বায়োমাস ও কত দিন পচবে তা লিখে <strong>Register Bed</strong> চাপুন। সময় হলে কার্ডে <strong>Ready to sieve</strong> দেখায়। <strong>Moisture</strong> দিয়ে আর্দ্রতা লিখুন। <strong>Harvest Bed</strong> দিয়ে কত কেজি চালা হলো, গ্রেড, এবং সার কোথায় যাবে (টবের মাটি না প্যাকেট) সেটা সেভ করুন।
+      </div>
+      <p>Bed <code>V-BED-01</code> is past its expected date, so the dashboard counts it under beds ready. Harvest stores a cost per kilogram from the inputs: cow dung at ৳2 per kg and biomass at ৳1 per kg.</p>
+      <figure>
+        <img src="screenshots/09-vermicompost.png" alt="Vermicompost bed ready to sieve" />
+        <figcaption>V-BED-01: 1200 kg cow dung, 300 kg biomass, ready to sieve.</figcaption>
+      </figure>
+    </section>
+
+    <section id="care">
+      <h2>10. Care</h2>
+      <div class="bn">
+        সকালের কাজ এখানে। গাছ, কাজের ধরন, কত ঘন ঘন, এবং তারিখ দিয়ে <strong>Add task</strong>। কাজ শেষে <strong>Done</strong>। প্রতিদিন, সাপ্তাহিক, বা দুই সপ্তাহের কাজ শেষ করলে পরের তারিখের কাজ নিজে থেকে তৈরি হয়। একবারের কাজ আর ফেরে না। ডান পাশে রোগের লগ — গাছ বা বেড, রোগ, চিকিৎসা — তারপর <strong>Log disease</strong>। সেরে গেলে <strong>Mark resolved</strong>।
+      </div>
+      <p>Task types: Watering, Nutrient spray, Fungicide, Insecticide, Pruning.</p>
+      <p>Frequency: Once, Daily, Weekly, Every two weeks.</p>
+      <p>Cashier can open this page. Adding and completing tasks is for Staff, Manager, and Admin.</p>
+      <figure>
+        <img src="screenshots/10-care.png" alt="Care schedule and disease log" />
+        <figcaption>Nothing is due today. The form is ready for the next watering task.</figcaption>
+      </figure>
+    </section>
+
+    <section id="distribution">
+      <h2>11. Distribution</h2>
+      <div class="bn">
+        বাগানের অর্ডার <strong>Bookings</strong>-এ। গাড়ি ছাড়ার কাগজ <strong>Transport</strong>-এ। ইন্ডিয়ামার্ট, মীশো বা অ্যামাজন থেকে আসা খোঁজ হাতে লিখে <strong>Marketplace leads</strong>-এ রাখুন। এই তিন সাইটের সঙ্গে সরাসরি সংযোগ এখন নেই — লিড নিজে এন্ট্রি করতে হয়।
+      </div>
+      <h3>Booking</h3>
+      <p>Type the customer, variety, and quantity, then <strong>Save booking</strong>. Status moves from Pending to Confirmed, Fulfilled, or Cancelled. A sample booking for Orchard Demo, 100 Black Diamond Guava, is still pending.</p>
+      <h3>Transport</h3>
+      <p>Type destination, what is on the vehicle, and the vehicle, then <strong>Save manifest</strong>. Status moves from Draft to Dispatched to Delivered. The manifest number is given by the system.</p>
+      <h3>Lead</h3>
+      <p>Pick IndiaMART, Meesho, or Amazon, type the contact and what they want, then <strong>Save lead</strong>. Status moves from New to Contacted, Converted, or Closed.</p>
+      <figure>
+        <img src="screenshots/11-distribution.png" alt="Distribution page with a pending booking" />
+        <figcaption>Bookings, transport, and marketplace leads on one page.</figcaption>
+      </figure>
+    </section>
+
+    <section id="accounts">
+      <h2>12. Accounts</h2>
+      <div class="bn">
+        হিসাব শুধু অ্যাডমিন ও ম্যানেজার। উপরে বিক্রির টাকা, স্টকের খরচ, খরচের খাতা, এবং মোট লাভ। নতুন খরচ বাঁ দিকে — সার, পলিব্যাগ, কোকোপিট, মজুরি, বিদ্যুৎ, বা অন্যান্য — অ্যামাউন্ট ও নোট দিয়ে <strong>Save</strong>।
+      </div>
+      <p>Gross profit is revenue minus the cost of plants sold minus nursery expenses. On this screen that is ৳180 − ৳45 − ৳1 = ৳134 (74.44%). The ৳1 line is a fertilizer note named “demo” from testing. The amount box on the left is the form for the next expense; it does not change the totals until you press Save.</p>
+      <p>This profit is the money already earned on sales. The dashboard “potential profit” is the money still sitting in unsold stock. They are different numbers on purpose.</p>
+      <figure>
+        <img src="screenshots/12-accounts.png" alt="Accounts with revenue, cost, expenses, and gross profit" />
+        <figcaption>Accounts after one sale and one small fertilizer expense.</figcaption>
+      </figure>
+    </section>
+
+    <section id="admin">
+      <h2>13. Admin</h2>
+      <div class="bn">
+        নতুন কর্মী শুধু অ্যাডমিন বানায়। নাম, ইমেল, পাসওয়ার্ড, রোল দিয়ে <strong>Create user</strong>। ডান পাশে অডিট লগ — কে কখন বুকিং, খরচ, বা পরিচর্যা সেভ করেছে।
+      </div>
+      <p>Roles you can assign: Admin, Manager, Staff, Cashier. The audit list does not include passwords.</p>
+      <figure>
+        <img src="screenshots/13-admin.png" alt="User list and audit log" />
+        <figcaption>Four staff accounts and the latest audit lines.</figcaption>
+      </figure>
+    </section>
+
+    <section id="day">
+      <h2>14. A working day</h2>
+      <h3>Staff — Field Horticulturist</h3>
+      <ol>
+        <li>Sign in as Staff.</li>
+        <li>Open <strong>Care</strong>. Finish today’s checklist with <strong>Done</strong>. Add tomorrow’s spray or watering if it is not already repeating.</li>
+        <li>Log any disease, then mark it resolved when the plant recovers.</li>
+        <li>On <strong>Mother Plants</strong>, log scions you cut and any flowering or fruiting.</li>
+        <li>On <strong>Propagation Hub</strong>, move batches forward and log mist temperature and humidity.</li>
+        <li>On <strong>Plant Inventory</strong>, adjust the count if plants died or the tally was wrong.</li>
+        <li>On <strong>Vermicompost</strong>, log moisture. Harvest a bed when it says ready to sieve.</li>
+      </ol>
+      <h3>Cashier — Counter Cashier</h3>
+      <ol>
+        <li>Sign in as Cashier and open <strong>Sales POS</strong>.</li>
+        <li>Scan, take payment, and press <strong>Complete Sale &amp; Print</strong>.</li>
+        <li>For an orchard order or a truck, use <strong>Distribution</strong>.</li>
+        <li>Leave stock counts, new mother plants, and accounts to the floor and the manager.</li>
+      </ol>
+      <h3>Manager</h3>
+      <ol>
+        <li>Check the dashboard for low stock, care due, beds ready, open bookings, and profit on unsold plants.</li>
+        <li>Register new mother plants. Mark hardened batches ready and create stock.</li>
+        <li>Record fertilizer, bags, labour, and electricity under <strong>Accounts</strong>.</li>
+        <li>You do not create user accounts. That stays with Admin.</li>
+      </ol>
+      <h3>Admin</h3>
+      <ol>
+        <li>Do any of the jobs above.</li>
+        <li>Create a user when someone joins, and pick the role that matches their work.</li>
+        <li>Read <strong>Admin → Audit log</strong> when you need to see who changed a booking, an expense, or a care task.</li>
+      </ol>
+    </section>
+  </main>
+</body>
+</html>

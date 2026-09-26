@@ -30,3 +30,15 @@ prisma/*.db-journal
 
 # Vite / PWA
 client-app/dev-dist/
+client-app/certs/
+
+# Uploaded plant photos
+backend-service/uploads/
+
+# Docs tooling + generated walkthrough videos (rebuild with docs/*.mjs)
+docs/node_modules/
+docs/nacecary_photos_and_flowers_for_testing/demo_videos/_work*/
+docs/nacecary_photos_and_flowers_for_testing/demo_videos/_live_record/
+docs/nacecary_photos_and_flowers_for_testing/demo_videos/**/*.mp4
+docs/nacecary_photos_and_flowers_for_testing/demo_videos/**/*.webm
+docs/nacecary_photos_and_flowers_for_testing/demo_videos/**/*.mp3

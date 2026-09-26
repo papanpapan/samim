@@ -1,0 +1,14 @@
+{
+  "name": "saba-nursery",
+  "private": true,
+  "description": "SN-ERMS root scripts. App code lives in client-app and backend-service.",
+  "scripts": {
+    "dev:api": "npm run dev --prefix backend-service",
+    "dev:web": "npm run dev --prefix client-app",
+    "build": "npm run build --prefix backend-service && npm run build --prefix client-app",
+    "lint": "npm run lint --prefix backend-service && npm run lint --prefix client-app",
+    "typecheck": "npm run lint",
+    "prisma:generate": "npm run prisma:generate --prefix backend-service",
+    "prisma:migrate": "npm run prisma:migrate --prefix backend-service"
+  }
+}

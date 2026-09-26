@@ -13,6 +13,10 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  const nurseryId = localStorage.getItem('sn-nursery');
+  if (nurseryId) {
+    config.headers['X-Nursery-Id'] = nurseryId;
+  }
   return config;
 });
 
@@ -35,15 +39,32 @@ export function setToken(token: string) {
 
 export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem('sn-nursery');
 }
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
 
+function detailText(details: unknown): string {
+  if (!details || typeof details !== 'object') return '';
+  const parts: string[] = [];
+  for (const [key, value] of Object.entries(details as Record<string, unknown>)) {
+    if (Array.isArray(value) && value.length > 0) parts.push(`${key}: ${value.join(', ')}`);
+    else if (value && typeof value === 'object') {
+      const nested = detailText(value);
+      if (nested) parts.push(nested);
+    }
+  }
+  return parts.join(' ');
+}
+
 export function apiErrorMessage(err: unknown): string {
   if (axios.isAxiosError(err)) {
-    return (err.response?.data as { message?: string } | undefined)?.message ?? err.message;
+    const data = err.response?.data as { message?: string; details?: unknown } | undefined;
+    const message = data?.message ?? err.message;
+    const extra = detailText(data?.details);
+    return extra ? `${message}. ${extra}` : message;
   }
   return err instanceof Error ? err.message : 'Unexpected error';
 }

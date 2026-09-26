@@ -11,6 +11,14 @@ const TRANSITIONS: Record<BatchStage, BatchStage[]> = {
   CLOSED: [],
 };
 
+export function batchRates(initialQuantity: number, currentQuantity: number, mortalityCount: number) {
+  if (initialQuantity <= 0) return { successPct: 0, mortalityPct: 0 };
+  return {
+    successPct: Number(((currentQuantity / initialQuantity) * 100).toFixed(1)),
+    mortalityPct: Number(((mortalityCount / initialQuantity) * 100).toFixed(1)),
+  };
+}
+
 export function assertTransition(from: BatchStage, to: BatchStage): void {
   if (!TRANSITIONS[from].includes(to)) {
     throw ApiError.badRequest(`Invalid stage transition: ${from} -> ${to}`);

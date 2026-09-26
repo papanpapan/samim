@@ -5,6 +5,10 @@ import { z } from 'zod';
 import { prisma } from '../config/database';
 import { env } from '../config/environment';
 import { ApiError } from '../utils/apiError';
+import { writeAudit } from '../services/audit.service';
+import { resolveAccess } from '../services/access.service';
+import { currentNurseryId } from '../services/tenantContext';
+import { assertUserCapacity } from '../services/plan.service';
 
 export const loginSchema = z.object({
   email: z.string().email(),
@@ -31,17 +35,16 @@ export async function login(req: Request, res: Response): Promise<void> {
     role: user.role,
     name: user.name,
   });
+  const profile = await resolveAccess(user.id, null);
   res.json({
     success: true,
-    data: {
-      token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
-    },
+    data: { token, user: profile },
   });
 }
 
 export async function me(req: Request, res: Response): Promise<void> {
-  res.json({ success: true, data: req.user });
+  const profile = await resolveAccess(req.user!.id, req.header('x-nursery-id'));
+  res.json({ success: true, data: profile });
 }
 
 export const registerSchema = z.object({
@@ -55,6 +58,9 @@ export const registerSchema = z.object({
 export async function createUser(req: Request, res: Response): Promise<void> {
   const body = req.body as z.infer<typeof registerSchema>;
   const passwordHash = await bcrypt.hash(body.password, env.BCRYPT_SALT_ROUNDS);
+  const nurseryId = currentNurseryId();
+  if (!nurseryId) throw ApiError.forbidden('Choose a nursery first');
+  await assertUserCapacity(nurseryId);
   const user = await prisma.user.create({
     data: {
       name: body.name,
@@ -62,8 +68,32 @@ export async function createUser(req: Request, res: Response): Promise<void> {
       phone: body.phone,
       passwordHash,
       role: body.role,
+      nurseryId,
     },
     select: { id: true, name: true, email: true, role: true, isActive: true },
   });
+  await writeAudit(req.user!.id, 'CREATE', 'User', user.id, { email: user.email, role: user.role });
   res.status(201).json({ success: true, data: user });
+}
+
+export const roleSchema = z.object({
+  role: z.enum(['ADMIN', 'MANAGER', 'STAFF', 'CASHIER']),
+  isActive: z.boolean().optional(),
+});
+
+export async function updateUserRole(req: Request, res: Response): Promise<void> {
+  const body = req.body as z.infer<typeof roleSchema>;
+  const nurseryId = currentNurseryId();
+  if (!nurseryId) throw ApiError.forbidden('Choose a nursery first');
+  const existing = await prisma.user.findUnique({ where: { id: req.params.id } });
+  if (!existing || existing.isPlatformOwner || existing.nurseryId !== nurseryId) {
+    throw ApiError.notFound('User not found');
+  }
+  const user = await prisma.user.update({
+    where: { id: existing.id },
+    data: { role: body.role, isActive: body.isActive ?? existing.isActive },
+    select: { id: true, name: true, email: true, role: true, isActive: true },
+  });
+  await writeAudit(req.user!.id, 'UPDATE', 'User', user.id, { role: user.role });
+  res.json({ success: true, data: user });
 }

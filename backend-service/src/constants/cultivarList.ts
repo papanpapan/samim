@@ -20,3 +20,7 @@ export const SOURCE_COUNTRIES = ['Thailand', 'Vietnam', 'Malaysia', 'India'] as 
 export const BAG_SIZES = ['5x7 inch', '8x10 inch', '12 inch Tob'] as const;
 
 export const PLANT_CATEGORIES = ['Fruit', 'Ornamental', 'Indoor'] as const;
+
+export const MOTHER_CATEGORIES = ['FRUIT', 'FLOWERING', 'FOLIAGE', 'MEDICINAL', 'EXOTIC'] as const;
+export const MOTHER_HEALTH = ['HEALTHY', 'FLOWERING', 'FRUITING', 'DORMANT', 'NEEDS_CARE'] as const;
+export const MOTHER_METHODS = ['GRAFTING_SCION', 'AIR_LAYERING', 'CUTTING', 'TISSUE_CULTURE'] as const;

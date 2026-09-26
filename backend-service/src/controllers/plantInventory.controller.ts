@@ -1,6 +1,9 @@
+import { randomBytes } from 'crypto';
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { prisma } from '../config/database';
+import { currentNurseryId, withNursery } from '../services/tenantContext';
+import { assertPlantCapacity } from '../services/plan.service';
 import { ApiError } from '../utils/apiError';
 import {
   encodeLabelData,
@@ -8,6 +11,13 @@ import {
   generateQrSvg,
 } from '../services/qrEngine.service';
 import { applyStockDelta } from '../services/stockLedger.service';
+import { phoneOrigin, safeOrigin } from '../utils/lanOrigin';
+import { enabledChannels } from '../services/channelAccess.service';
+
+const inventoryInclude = {
+  photos: { orderBy: { createdAt: 'asc' as const } },
+  channelPrices: { orderBy: { channel: 'asc' as const } },
+};
 
 export const listInventorySchema = z.object({
   search: z.string().optional(),
@@ -16,6 +26,25 @@ export const listInventorySchema = z.object({
     .optional()
     .transform((v) => v === 'true'),
 });
+
+function presentInventory(plant: {
+  retailPrice: { toString(): string };
+  wholesalePrice: { toString(): string };
+  costPrice: { toString(): string };
+  videoStoredName: string | null;
+  photos: { id: string; storedName: string }[];
+  channelPrices?: { channel: string; price: { toString(): string } }[];
+}) {
+  return {
+    ...plant,
+    retailPrice: Number(plant.retailPrice),
+    wholesalePrice: Number(plant.wholesalePrice),
+    costPrice: Number(plant.costPrice),
+    channelPrices: (plant.channelPrices ?? []).map((row) => ({ channel: row.channel, price: Number(row.price) })),
+    videoUrl: plant.videoStoredName ? `/api/uploads/stock/${plant.videoStoredName}` : null,
+    photos: plant.photos.map((photo) => ({ id: photo.id, url: `/api/uploads/stock/${photo.storedName}` })),
+  };
+}
 
 export async function listInventory(req: Request, res: Response): Promise<void> {
   const { search } = req.query as unknown as z.infer<typeof listInventorySchema>;
@@ -29,14 +58,15 @@ export async function listInventory(req: Request, res: Response): Promise<void> 
         }
       : undefined,
     orderBy: { createdAt: 'desc' },
+    include: inventoryInclude,
   });
-  res.json({ success: true, data: items });
+  res.json({ success: true, data: items.map(presentInventory) });
 }
 
 // Fast SKU/barcode lookup for the POS scanner (FR-QR-01, target < 200ms).
 export async function lookupBySku(req: Request, res: Response): Promise<void> {
   const sku = req.params.sku;
-  const plant = await prisma.plantInventory.findUnique({ where: { sku } });
+  const plant = await prisma.plantInventory.findFirst({ where: { sku } });
   if (!plant) throw ApiError.notFound(`No plant found for SKU ${sku}`);
   res.json({ success: true, data: plant });
 }
@@ -57,10 +87,12 @@ export const createInventorySchema = z.object({
 export async function createInventory(req: Request, res: Response): Promise<void> {
   const body = req.body as z.infer<typeof createInventorySchema>;
   const recordedBy = req.user!.id;
+  const nurseryId = currentNurseryId();
+  if (nurseryId) await assertPlantCapacity(nurseryId);
 
   const created = await prisma.$transaction(async (tx) => {
     const plant = await tx.plantInventory.create({
-      data: {
+      data: withNursery({
         sku: body.sku,
         commonName: body.commonName,
         variety: body.variety,
@@ -77,7 +109,7 @@ export async function createInventory(req: Request, res: Response): Promise<void
           bagSize: body.bagSize,
           mrp: body.retailPrice,
         }),
-      },
+      }),
     });
     if (body.initialStock > 0) {
       await applyStockDelta({
@@ -92,6 +124,185 @@ export async function createInventory(req: Request, res: Response): Promise<void
   });
 
   res.status(201).json({ success: true, data: created });
+}
+
+export const inventoryPriceSchema = z.object({
+  offers: z.array(z.object({
+    channel: z.string().regex(/^[A-Z][A-Z0-9_]{1,31}$/),
+    price: z.coerce.number().nonnegative(),
+  })).min(1).max(40),
+});
+
+export async function updateInventoryPrice(req: Request, res: Response): Promise<void> {
+  const body = req.body as z.infer<typeof inventoryPriceSchema>;
+  const offers = new Map(body.offers.map((offer) => [offer.channel, offer.price]));
+  const nurseryIdForChannels = currentNurseryId();
+  if (nurseryIdForChannels) {
+    const allowed = new Set(await enabledChannels(nurseryIdForChannels));
+    if ([...offers.keys()].some((channel) => !allowed.has(channel))) {
+      throw ApiError.badRequest('This nursery cannot price that sales channel');
+    }
+  }
+  const plant = await prisma.plantInventory.findUnique({
+    where: { id: req.params.id },
+    include: { batch: { select: { batchCode: true } } },
+  });
+  if (!plant) throw ApiError.notFound('Plant not found');
+  const nurseryId = plant.nurseryId;
+  const retail = offers.get('RETAIL_COUNTER');
+  const wholesale = offers.get('WHOLESALE_ORCHARDIST');
+  const updated = await prisma.$transaction(async (tx) => {
+    for (const [channel, price] of offers) {
+      await tx.plantChannelPrice.upsert({
+        where: { plantId_channel: { plantId: plant.id, channel } },
+        create: { nurseryId, plantId: plant.id, channel, price },
+        update: { price },
+      });
+    }
+    return tx.plantInventory.update({
+      where: { id: plant.id },
+      data: {
+        ...(retail != null
+          ? {
+              retailPrice: retail,
+              qrCodeData: encodeLabelData({
+                sku: plant.sku,
+                commonName: plant.commonName,
+                bagSize: plant.bagSize,
+                mrp: retail,
+                batchCode: plant.batch?.batchCode,
+              }),
+            }
+          : {}),
+        ...(wholesale != null ? { wholesalePrice: wholesale } : {}),
+      },
+      include: inventoryInclude,
+    });
+  });
+  res.json({ success: true, data: presentInventory(updated) });
+}
+
+export const inventoryDetailsSchema = z.object({
+  plantHeight: z.string().max(40).optional(),
+  plantAge: z.string().max(40).optional(),
+  zoneLabel: z.string().max(80).optional(),
+  reservedQty: z.coerce.number().int().nonnegative().optional(),
+  reorderAlert: z.coerce.number().int().nonnegative().optional(),
+  wholesalePrice: z.coerce.number().nonnegative().optional(),
+});
+
+export async function updateInventoryDetails(req: Request, res: Response): Promise<void> {
+  const body = req.body as z.infer<typeof inventoryDetailsSchema>;
+  const plant = await prisma.plantInventory.findUnique({ where: { id: req.params.id } });
+  if (!plant) throw ApiError.notFound('Plant not found');
+  if (body.reservedQty != null && body.reservedQty > plant.currentStock) {
+    throw ApiError.badRequest('Reserved quantity cannot be more than the plants in stock');
+  }
+  if (body.wholesalePrice != null) {
+    await prisma.plantChannelPrice.upsert({
+      where: { plantId_channel: { plantId: plant.id, channel: 'WHOLESALE_ORCHARDIST' } },
+      create: { nurseryId: plant.nurseryId, plantId: plant.id, channel: 'WHOLESALE_ORCHARDIST', price: body.wholesalePrice },
+      update: { price: body.wholesalePrice },
+    });
+  }
+  const updated = await prisma.plantInventory.update({
+    where: { id: plant.id },
+    data: {
+      plantHeight: body.plantHeight?.trim() || null,
+      plantAge: body.plantAge?.trim() || null,
+      zoneLabel: body.zoneLabel?.trim() || null,
+      ...(body.reservedQty != null ? { reservedQty: body.reservedQty } : {}),
+      ...(body.reorderAlert != null ? { reorderAlert: body.reorderAlert } : {}),
+      ...(body.wholesalePrice != null ? { wholesalePrice: body.wholesalePrice } : {}),
+    },
+    include: inventoryInclude,
+  });
+  res.json({ success: true, data: presentInventory(updated) });
+}
+
+async function ensureShareCode(plantId: string, current: string | null) {
+  if (current) return current;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const shareCode = randomBytes(6).toString('hex');
+    const taken = await prisma.plantInventory.findFirst({ where: { shareCode } });
+    if (taken) continue;
+    await prisma.plantInventory.update({ where: { id: plantId }, data: { shareCode } });
+    return shareCode;
+  }
+  throw ApiError.badRequest('Could not create a customer code');
+}
+
+export const labelSheetSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(48),
+});
+
+export async function inventoryLabelSheet(req: Request, res: Response): Promise<void> {
+  const body = req.body as z.infer<typeof labelSheetSchema>;
+  const origin = phoneOrigin(safeOrigin(req.query.origin));
+  const plants = await prisma.plantInventory.findMany({ where: { id: { in: body.ids } } });
+  const labels = [];
+  for (const plant of plants) {
+    const shareCode = await ensureShareCode(plant.id, plant.shareCode);
+    const publicUrl = origin ? `${origin}/stock/${shareCode}` : '';
+    labels.push({
+      id: plant.id,
+      sku: plant.sku,
+      commonName: plant.commonName,
+      variety: plant.variety,
+      bagSize: plant.bagSize,
+      zoneLabel: plant.zoneLabel,
+      retailPrice: Number(plant.retailPrice),
+      wholesalePrice: Number(plant.wholesalePrice),
+      publicUrl,
+      qrDataUrl: publicUrl ? await generateQrDataUrl(publicUrl) : '',
+    });
+  }
+  res.json({ success: true, data: { labels } });
+}
+
+function scanToken(raw: string) {
+  const trimmed = raw.trim();
+  const sku = trimmed.match(/SKU:([^|]+)/)?.[1];
+  const share = trimmed.includes('/stock/') ? trimmed.split('/stock/').pop()?.split(/[?#]/)[0] : undefined;
+  return { trimmed, sku, share };
+}
+
+export async function scanInventory(req: Request, res: Response): Promise<void> {
+  const token = scanToken(req.params.code);
+  const plant = await prisma.plantInventory.findFirst({
+    where: {
+      OR: [
+        { sku: token.trimmed },
+        ...(token.sku ? [{ sku: token.sku }] : []),
+        ...(token.share ? [{ shareCode: token.share }] : []),
+        { shareCode: token.trimmed },
+      ],
+    },
+    include: { photos: { orderBy: { createdAt: 'asc' }, take: 1 }, channelPrices: { orderBy: { channel: 'asc' } } },
+  });
+  if (!plant) throw ApiError.notFound('Stock not found');
+  res.json({
+    success: true,
+    data: {
+      ...presentInventory(plant),
+      available: Math.max(0, plant.currentStock - plant.reservedQty),
+    },
+  });
+}
+
+export async function customerTag(req: Request, res: Response): Promise<void> {
+  const plant = await prisma.plantInventory.findUnique({ where: { id: req.params.id } });
+  if (!plant?.shareCode) throw ApiError.notFound('Customer page is not ready');
+  const origin = phoneOrigin(safeOrigin(req.query.origin));
+  const publicUrl = origin ? `${origin}/stock/${plant.shareCode}` : '';
+  res.json({
+    success: true,
+    data: {
+      sku: plant.sku,
+      publicUrl,
+      qrDataUrl: publicUrl ? await generateQrDataUrl(publicUrl) : '',
+    },
+  });
 }
 
 export const adjustStockSchema = z.object({
@@ -119,14 +330,17 @@ export async function adjustStock(req: Request, res: Response): Promise<void> {
 export async function getLabel(req: Request, res: Response): Promise<void> {
   const plant = await prisma.plantInventory.findUnique({ where: { id: req.params.id } });
   if (!plant) throw ApiError.notFound('Plant not found');
-  const data =
-    plant.qrCodeData ??
-    encodeLabelData({
-      sku: plant.sku,
-      commonName: plant.commonName,
-      bagSize: plant.bagSize,
-      mrp: String(plant.retailPrice),
-    });
+  const shareCode = await ensureShareCode(plant.id, plant.shareCode);
+  const origin = phoneOrigin(safeOrigin(req.query.origin));
+  const data = origin
+    ? `${origin}/stock/${shareCode}`
+    : plant.qrCodeData ??
+      encodeLabelData({
+        sku: plant.sku,
+        commonName: plant.commonName,
+        bagSize: plant.bagSize,
+        mrp: String(plant.retailPrice),
+      });
   const [pngDataUrl, svg] = await Promise.all([
     generateQrDataUrl(data),
     generateQrSvg(data),

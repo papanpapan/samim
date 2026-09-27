@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 160" role="img" aria-label="Saba AgriCo.  Integrated Agri-Supply Ecosystem">
+  <defs>
+    <linearGradient id="sa-disc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#15803D"/>
+      <stop offset="1" stop-color="#14532D"/>
+    </linearGradient>
+    <linearGradient id="sa-gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FDE68A"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+  <circle cx="80" cy="80" r="70" fill="none" stroke="#22C55E" stroke-opacity="0.35" stroke-width="3"/>
+  <path d="M80 10A70 70 0 0 1 146.57 58.37" fill="none" stroke="url(#sa-gold)" stroke-width="4.5" stroke-linecap="round"/>
+  <circle cx="80" cy="10" r="5" fill="#F59E0B"/>
+  <circle cx="146.57" cy="58.37" r="5" fill="#F59E0B"/>
+  <circle cx="19.38" cy="115" r="4.5" fill="#22C55E"/>
+  <circle cx="115" cy="140.62" r="4.5" fill="#22C55E"/>
+  <circle cx="80" cy="80" r="54" fill="url(#sa-disc)"/>
+  <circle cx="80" cy="80" r="62" fill="none" stroke="#86EFAC" stroke-opacity="0.45" stroke-width="1.5" stroke-dasharray="2 6"/>
+  <path d="M100 56C104 42 114 37 122 38C121 49 113 57 100 56Z" fill="#86EFAC"/>
+  <path d="M100 56C93 45 94 34 100 27C107 35 107 46 100 56Z" fill="#BBF7D0"/>
+  <path d="M100 56C94 48 70 46 64 58C58 70 74 76 82 80C92 85 102 92 96 104C90 116 66 114 60 106" fill="none" stroke="#ECFDF5" stroke-width="11" stroke-linecap="round"/>
+  <circle cx="81" cy="80" r="7.5" fill="url(#sa-gold)" stroke="#FEF3C7" stroke-width="2"/>
+  <text x="178" y="86" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="54" font-weight="800" letter-spacing="-1" fill="#14532D">Saba <tspan fill="#15803D">AgriCo</tspan><tspan fill="#F59E0B">.</tspan></text>
+  <text x="180" y="122" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="17" font-weight="600" letter-spacing="3" fill="#4D7C0F">INTEGRATED AGRI-SUPPLY ECOSYSTEM</text>
+</svg>

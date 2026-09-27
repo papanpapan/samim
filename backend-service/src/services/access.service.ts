@@ -2,6 +2,7 @@ import { prisma } from '../config/database';
 import { FEATURE_KEYS } from '../constants/features';
 import { activeFeatureKeys } from './catalog.service';
 import { ApiError } from '../utils/apiError';
+import { parseGstSlabs } from '../utils/gst';
 
 export interface NurserySnapshot {
   id: string;
@@ -9,6 +10,8 @@ export interface NurserySnapshot {
   code: string;
   status: string;
   currencyCode: string;
+  gstDefaultPct: number;
+  gstSlabs: number[];
 }
 
 export interface AccessProfile {
@@ -81,6 +84,8 @@ export async function resolveAccess(userId: string, nurseryHeader?: string | nul
       code: row.code,
       status: row.status,
       currencyCode: row.currencyCode === 'INR' ? 'INR' : 'BDT',
+      gstDefaultPct: Number(row.gstDefaultPct ?? 0),
+      gstSlabs: parseGstSlabs(row.gstSlabs),
     };
     features = effectiveFeatures(row.features, row.roleFeatures, user.featureGrants, user.isPlatformOwner, allowedKeys);
   }

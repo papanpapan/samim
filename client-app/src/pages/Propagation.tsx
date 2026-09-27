@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ChevronDown, Plus, QrCode, Search } from 'lucide-react';
 import { api, apiErrorMessage } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
-import { FIELD_ROLES, hasRole } from '../auth/roles';
+import { canFieldFloor } from '../auth/roles';
 import type { MotherPlant, PropagationBatch } from '../types';
 import { ErrorNote, Field, FieldHint, ListSkeleton, Modal, PageHeader, StageBadge } from '../components/ui';
 import { AudioAssistTrigger } from '../components/AudioAssistTrigger';
@@ -210,8 +210,8 @@ export function Propagation() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const openedFromLink = useRef(false);
-  const canRunBatch = hasRole(user?.role, FIELD_ROLES);
-  const canMarkReady = hasRole(user?.role, FIELD_ROLES);
+  const canRunBatch = canFieldFloor(user?.role);
+  const canMarkReady = canFieldFloor(user?.role);
   const [batches, setBatches] = useState<PropagationBatch[]>([]);
   const [mothers, setMothers] = useState<MotherPlant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -772,16 +772,16 @@ export function Propagation() {
             </Field>
             <Field label={t('propagation.category')}>
               <select className="input" value={readyForm.category} onChange={(e) => setReadyForm({ ...readyForm, category: e.target.value })}>
-                <option value="Fruit">Fruit</option>
-                <option value="Ornamental">Ornamental</option>
-                <option value="Indoor">Indoor</option>
+                <option value="Fruit">{t('propagation.plantCategories.Fruit')}</option>
+                <option value="Ornamental">{t('propagation.plantCategories.Ornamental')}</option>
+                <option value="Indoor">{t('propagation.plantCategories.Indoor')}</option>
               </select>
             </Field>
             <Field label={t('propagation.bagSize')}>
               <select className="input" value={readyForm.bagSize} onChange={(e) => setReadyForm({ ...readyForm, bagSize: e.target.value })}>
-                <option>5x7 inch</option>
-                <option>8x10 inch</option>
-                <option>12 inch Tob</option>
+                <option value="5x7 inch">{t('propagation.bagSizes.5x7')}</option>
+                <option value="8x10 inch">{t('propagation.bagSizes.8x10')}</option>
+                <option value="12 inch Tob">{t('propagation.bagSizes.12tob')}</option>
               </select>
             </Field>
             <Field label={t('propagation.variety')}>

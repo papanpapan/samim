@@ -751,7 +751,7 @@ export function MotherPlants() {
     const popup = window.open('', '_blank', 'width=420,height=360');
     if (!popup) return;
     popup.document.write(
-      `<html><body style="font-family:sans-serif;text-align:center;padding:24px"><h2 style="margin:0">Saba Nursery</h2><p>${tag.tagNumber}</p><img src="${tag.qrDataUrl}" width="180" height="180" /><p>${tag.varietyName}<br/>${tag.plotLocation}</p></body></html>`,
+      `<html><body style="font-family:sans-serif;text-align:center;padding:24px"><h2 style="margin:0">Saba AgriCo.</h2><p>${tag.tagNumber}</p><img src="${tag.qrDataUrl}" width="180" height="180" /><p>${tag.varietyName}<br/>${tag.plotLocation}</p></body></html>`,
     );
     popup.document.close();
     popup.focus();

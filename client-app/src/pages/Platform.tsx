@@ -1,12 +1,13 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Check, Plus, Trash2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, apiErrorMessage } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { AddressField } from '../components/AddressField';
 import { ErrorNote, Field, ListSkeleton, Modal, PageHeader } from '../components/ui';
 import { channelName } from '../constants/salesChannels';
+import SabaAgriLogo, { BRAND_NAME } from '../components/common/SabaAgriLogo';
 
 import { formatMoney } from '../utils/money';
 
@@ -667,6 +668,13 @@ export function Platform() {
 
   return (
     <div>
+      <div className="mb-3 flex items-center gap-3 rounded-2xl border border-forest-100 bg-gradient-to-r from-forest-50 to-white px-4 py-3">
+        <SabaAgriLogo variant="icon" height={44} />
+        <div className="min-w-0">
+          <div className="text-sm font-extrabold tracking-tight text-nursery-950">{BRAND_NAME}</div>
+          <div className="truncate text-xs font-medium text-nursery-600">{t('brand.tagline')}</div>
+        </div>
+      </div>
       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">{t('platform.kicker')}</p>
       <PageHeader
         title={t('platform.title')}
@@ -1135,6 +1143,14 @@ export function Platform() {
         title={selected ? `${selected.name} · ${t('platform.users')}` : t('platform.users')}
         width="max-w-3xl"
       >
+        {selected && (
+          <p className="mb-3 rounded-xl bg-emerald-50 px-3 py-2 text-xs text-emerald-900 ring-1 ring-emerald-200">
+            {t('staffTeam.platformNote')}{' '}
+            <Link to="/staff-team" className="font-semibold underline">
+              {t('staffTeam.title')}
+            </Link>
+          </p>
+        )}
         {selected && grantUser && (
           <div>
             <button className="btn-ghost mb-3" type="button" onClick={() => setGrantUserId(null)}>{t('platform.back')}</button>

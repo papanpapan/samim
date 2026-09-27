@@ -12,6 +12,7 @@ import { errorHandler, notFoundHandler } from './middlewares/errorHandler.middle
 
 export function createApp() {
   const app = express();
+  if (env.TRUST_PROXY > 0) app.set('trust proxy', env.TRUST_PROXY);
 
   // Security headers (NFR-SEC-01). Relax CSP in dev so Swagger UI can load.
   app.use(

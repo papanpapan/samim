@@ -63,6 +63,10 @@ model Nursery {
   plan          String             @default("FREE")
   planPrice     Decimal            @default(0) @db.Decimal(12, 2)
   currencyCode  String             @default("BDT")
+  /// Default GST % applied at POS when currency is INR (local testing, not e-invoice).
+  gstDefaultPct Decimal            @default(0) @db.Decimal(5, 2)
+  /// Comma-separated allowed GST slabs, e.g. "0,5,12,18"
+  gstSlabs      String             @default("0,5,12,18")
   userLimit     Int                @default(0)
   plantLimit    Int                @default(0)
   status        String             @default("ACTIVE")

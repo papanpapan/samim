@@ -503,7 +503,7 @@ export function Inventory() {
               <div className="flex items-center gap-3">
                 <img src={label.pngDataUrl} alt="QR code" className="h-24 w-24" />
                 <div className="min-w-0">
-                  <div className="text-[10px] font-bold uppercase text-nursery-700">Saba Nursery</div>
+                  <div className="text-[10px] font-bold uppercase text-nursery-700">Saba AgriCo.</div>
                   <div className="truncate text-sm font-bold text-nursery-900">{label.label.commonName}</div>
                   <div className="text-xs text-nursery-600">{label.label.bagSize}</div>
                   <div className="font-mono text-[10px] text-nursery-500">{label.label.sku}</div>

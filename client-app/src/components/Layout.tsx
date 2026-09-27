@@ -1,19 +1,23 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Building2, ClipboardCheck, LayoutDashboard, Leaf, LogOut, MapPin, Menu, Package, Shield, ShieldAlert, ShoppingCart, Sprout, StickyNote, TreeDeciduous, Truck, Wallet, type LucideIcon } from 'lucide-react';
+import { Building2, ClipboardCheck, Hand, LayoutDashboard, Leaf, LogOut, MapPin, Menu, Package, Shield, ShieldAlert, ShoppingCart, Sprout, StickyNote, TreeDeciduous, Truck, Users, Wallet, type LucideIcon } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { ADMIN_ROLES, hasRole, MANAGER_ROLES, POS_ROLES, SITE_ROLES } from '../auth/roles';
 import type { FeatureKey, Role } from '../types';
 import { LiveDock } from './LiveDock';
-import { BrandLockup } from './Logo';
+import SabaAgriLogo from './common/SabaAgriLogo';
+import { EnvBadge } from './EnvBadge';
 import { PreferencesControls } from './PreferencesControls';
 import { AudioAssistTrigger } from './AudioAssistTrigger';
 import { AppNavButtons, InstallHint } from './AppNavButtons';
+import { SabaVoiceAssistant } from './SabaVoiceAssistant';
 
 const NAV: { to: string; label: string; icon: LucideIcon; end: boolean; roles?: readonly Role[]; feature?: FeatureKey; ownerOnly?: boolean }[] = [
   { to: '/platform', label: 'nav.platform', icon: Building2, end: false, ownerOnly: true },
   { to: '/', label: 'nav.dashboard', icon: LayoutDashboard, end: true },
+  { to: '/field', label: 'nav.fieldHub', icon: Hand, end: false },
+  { to: '/staff-team', label: 'nav.staffTeam', icon: Users, end: false },
   { to: '/nursery', label: 'nav.myNursery', icon: MapPin, end: false, roles: SITE_ROLES },
   { to: '/mother-plants', label: 'nav.motherPlants', icon: TreeDeciduous, end: false, feature: 'MOTHER_PLANTS' },
   { to: '/propagation', label: 'nav.propagation', icon: Sprout, end: false, feature: 'PROPAGATION' },
@@ -25,7 +29,6 @@ const NAV: { to: string; label: string; icon: LucideIcon; end: boolean; roles?: 
   { to: '/reports', label: 'nav.reports', icon: Wallet, end: false, roles: MANAGER_ROLES, feature: 'ACCOUNTS' },
   { to: '/admin', label: 'nav.admin', icon: Shield, end: false, roles: ADMIN_ROLES, feature: 'NURSERY_ADMIN' },
   { to: '/alerts', label: 'nav.alerts', icon: ShieldAlert, end: false, feature: 'CCTV_ALERTS' },
-  // Voice / Treatment stay routable but off the main menu for cleaner testing UX.
 ];
 
 export function Layout() {
@@ -41,7 +44,7 @@ export function Layout() {
         }`}
       >
         <div className="shrink-0 border-b border-slate-200 px-5 py-5">
-          <BrandLockup subtitle="SN-ERMS v3.0" />
+          <SabaAgriLogo variant="full" height={36} tagline={t('brand.short')} />
         </div>
         <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-3">
           {NAV.filter((item) => {
@@ -115,9 +118,10 @@ export function Layout() {
             </button>
             <AppNavButtons className="lg:hidden" />
             <div className="min-w-0 lg:hidden">
-              <BrandLockup compact subtitle="SN-ERMS" />
+              <SabaAgriLogo variant="icon" height={34} />
             </div>
             <div className="hidden truncate text-sm font-medium text-slate-500 lg:block">{t('nav.tagline')}</div>
+            <EnvBadge />
           </div>
 
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
@@ -158,6 +162,7 @@ export function Layout() {
           </div>
         </main>
       </div>
+      <SabaVoiceAssistant />
     </div>
   );
 }

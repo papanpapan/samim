@@ -1,0 +1,48 @@
+# Render Blueprint — staging API + separate staging PostgreSQL.
+# Render dashboard → New → Blueprint → pick this repo, branch "staging".
+databases:
+  - name: saba-agrico-db-staging
+    plan: free
+    databaseName: saba_staging
+    user: saba_staging
+
+services:
+  - type: web
+    name: saba-agrico-api-staging
+    runtime: node
+    plan: free
+    rootDir: backend-service
+    branch: staging
+    autoDeploy: true
+    healthCheckPath: /health
+    buildCommand: npm ci --include=dev && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && if [ "$SEED_ON_START" = "true" ]; then npm run seed; fi && npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: saba-agrico-db-staging
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 12h
+      - key: BCRYPT_SALT_ROUNDS
+        value: "12"
+      - key: CORS_ORIGIN
+        value: https://saba-agrico-staging.vercel.app
+      - key: RATE_LIMIT_MAX
+        value: "300"
+      - key: TRUST_PROXY
+        value: "2"
+      - key: ENABLE_API_DOCS
+        value: "true"
+      - key: SEED_ON_START
+        value: "true"
+      - key: SEED_ADMIN_EMAIL
+        value: admin@sabanursery.com
+      - key: SEED_ADMIN_PASSWORD
+        sync: false

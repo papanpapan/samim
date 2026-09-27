@@ -302,6 +302,7 @@ export async function listAlerts(req: Request, res: Response): Promise<void> {
         name: true,
         address: true,
         nurseryId: true,
+        nursery: { select: { name: true } },
       },
     });
 
@@ -342,7 +343,7 @@ export async function listAlerts(req: Request, res: Response): Promise<void> {
           id: row.id,
           name: placeLabel(row.name, row.address),
           nurseryId: row.nurseryId,
-          nurseryName: 'nursery' in row ? row.nursery?.name : undefined,
+          nurseryName: row.nursery.name,
           cameraIds: cams,
         };
       }),

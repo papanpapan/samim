@@ -6,6 +6,13 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const certDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'certs');
+const certKey = path.join(certDir, 'dev-key.pem');
+const certFile = path.join(certDir, 'dev-cert.pem');
+// certs/ is gitignored, so CI and cloud builds run without local HTTPS.
+const devHttps =
+  fs.existsSync(certKey) && fs.existsSync(certFile)
+    ? { key: fs.readFileSync(certKey), cert: fs.readFileSync(certFile) }
+    : undefined;
 
 // SN-ERMS client: installable PWA (Web + Android + iOS home-screen app).
 export default defineConfig({
@@ -13,11 +20,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'favicon.ico'],
       manifest: {
-        name: 'Saba Nursery ERMS',
-        short_name: 'Saba ERMS',
-        description: 'Saba Nursery Enterprise Resource & Smart Inventory Management System',
+        name: 'Saba AgriCo. Ecosystem',
+        short_name: 'Saba AgriCo.',
+        description: 'Saba AgriCo. — Integrated Agri-Supply & Nursery Ecosystem: seedling production, field sourcing, stock, POS and supply-chain logistics.',
         theme_color: '#166534',
         background_color: '#f0fdf4',
         display: 'standalone',
@@ -27,12 +34,14 @@ export default defineConfig({
         scope: '/',
         id: '/',
         icons: [
+          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml' },
           { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512.png', sizes: '512x512', type: 'image/png' },
           { src: 'pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
@@ -53,10 +62,7 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
-    https: {
-      key: fs.readFileSync(path.join(certDir, 'dev-key.pem')),
-      cert: fs.readFileSync(path.join(certDir, 'dev-cert.pem')),
-    },
+    https: devHttps,
     // Allow access through proxied/tunnelled hostnames (e.g. Cloud Agent port
     // forwarding). Without this Vite 5 returns "Blocked request. This host is
     // not allowed." for any non-localhost Host header.
@@ -71,10 +77,7 @@ export default defineConfig({
   preview: {
     port: 5173,
     host: true,
-    https: {
-      key: fs.readFileSync(path.join(certDir, 'dev-key.pem')),
-      cert: fs.readFileSync(path.join(certDir, 'dev-cert.pem')),
-    },
+    https: devHttps,
     allowedHosts: true,
   },
 });

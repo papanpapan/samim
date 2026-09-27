@@ -1,7 +1,8 @@
-/** Only fully translated UI languages. Incomplete packs stay out of the picker. */
+/** UI languages with translation packs (missing keys fall back to English). */
 export const LANGUAGES = [
   { code: 'bn', label: 'বাংলা', flag: '🇧🇩', speech: 'bn-IN' },
   { code: 'en', label: 'English', flag: '🇬🇧', speech: 'en-US' },
+  { code: 'hi', label: 'हिन्दी', flag: '🇮🇳', speech: 'hi-IN' },
 ] as const;
 
 export type LanguageCode = (typeof LANGUAGES)[number]['code'];

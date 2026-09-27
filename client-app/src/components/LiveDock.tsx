@@ -601,7 +601,7 @@ export function LiveDock() {
       )}
       <button
         type="button"
-        className="fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-forest-700 text-white shadow-lg transition duration-300 hover:scale-105 hover:bg-forest-800"
+        className="fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-sky-700 text-white shadow-lg transition duration-300 hover:scale-105 hover:bg-sky-800"
         onClick={show}
         aria-label={t('live.open')}
       >

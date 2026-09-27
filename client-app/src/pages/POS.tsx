@@ -10,6 +10,8 @@ import { AudioAssistTrigger } from '../components/AudioAssistTrigger';
 import { InventoryScanner } from '../components/inventory/InventoryScanner';
 import { channelName, FALLBACK_CHANNELS, readChannelChoices, type ChannelChoice } from '../constants/salesChannels';
 import { formatMoney, isInr } from '../utils/money';
+import { usePaidSimulation } from '../components/PaidSimulation';
+import brandIconSvg from '../assets/logo/saba-agrico-icon.svg?raw';
 
 interface CartLine {
   plant: PlantInventory;
@@ -54,32 +56,48 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char] ?? char);
 }
 
-function printReceipt(receipt: Receipt, nurseryName: string, currencyCode?: string | null, taxLabel?: string) {
+function printReceipt(
+  receipt: Receipt,
+  nurseryName: string,
+  currencyCode: string | null | undefined,
+  labels: { plant: string; qty: string; price: string; total: string; tax: string; brandSub: string },
+) {
   const money = (value: string | number) => formatMoney(value, currencyCode);
-  const lines = (receipt.items ?? []).map((line) => (
-    `<tr><td>${escapeHtml(line.plant?.commonName ?? '')}<br><span>${escapeHtml(line.plant?.sku ?? '')} · ${escapeHtml(line.plant?.bagSize ?? '')}</span></td><td>${line.quantity}</td><td>${money(line.unitPrice)}</td><td>${money(line.itemTotalPrice)}</td></tr>`
-  )).join('');
+  const lines = (receipt.items ?? [])
+    .map(
+      (line) =>
+        `<tr><td>${escapeHtml(line.plant?.commonName ?? '')}<br><span>${escapeHtml(line.plant?.sku ?? '')} · ${escapeHtml(line.plant?.bagSize ?? '')}</span></td><td>${line.quantity}</td><td>${money(line.unitPrice)}</td><td>${money(line.itemTotalPrice)}</td></tr>`,
+    )
+    .join('');
   const taxPct = Number(receipt.taxPct ?? 0);
   const taxAmount = Number(receipt.taxAmount ?? 0);
-  const taxRow = taxAmount > 0
-    ? `<p>${escapeHtml(taxLabel ?? 'Tax')} (${taxPct}%): ${money(taxAmount)}</p>`
-    : '';
+  const taxRow =
+    taxAmount > 0
+      ? `<p>${escapeHtml(labels.tax)} (${taxPct}%): ${money(taxAmount)}</p>`
+      : '';
   const popup = window.open('', '_blank', 'width=720,height=800');
   if (!popup) return;
   popup.document.write(`<!doctype html><html><head><title>${escapeHtml(receipt.invoiceNumber)}</title><style>
     @page { size: A4; margin: 12mm; }
-    body { margin: 0; font-family: sans-serif; color: #1e293b; }
-    h1 { font-size: 20px; margin: 0; }
+    body { margin: 0; font-family: "Noto Sans Bengali", "Noto Sans Devanagari", sans-serif; color: #1e293b; }
+    h1 { font-size: 22px; margin: 0; letter-spacing: 0.06em; color: #14532d; }
     p { margin: 4px 0; font-size: 13px; }
+    .brand { display: flex; align-items: center; gap: 12px; border-bottom: 2px solid #15803d; padding-bottom: 10px; margin-bottom: 10px; }
+    .brand svg { width: 52px; height: 52px; flex-shrink: 0; }
+    .brand-sub { color: #4d7c0f; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; }
     table { width: 100%; border-collapse: collapse; margin-top: 16px; }
     th, td { border-bottom: 1px solid #e2e8f0; text-align: left; padding: 8px 4px; font-size: 13px; vertical-align: top; }
     td span { color: #64748b; font-size: 11px; }
     .total { margin-top: 12px; text-align: right; font-size: 16px; font-weight: 700; }
   </style></head><body>
-    <h1>${escapeHtml(nurseryName)}</h1>
+    <div class="brand">
+      ${brandIconSvg}
+      <div><h1>SABA AGRICO.</h1><div class="brand-sub">${escapeHtml(labels.brandSub)}</div></div>
+    </div>
+    <p><strong>${escapeHtml(nurseryName)}</strong></p>
     <p>${escapeHtml(receipt.invoiceNumber)}</p>
     <p>${escapeHtml(receipt.customerName)}${receipt.customerPhone ? ` · ${escapeHtml(receipt.customerPhone)}` : ''}${receipt.customerCity ? ` · ${escapeHtml(receipt.customerCity)}` : ''}</p>
-    <table><thead><tr><th>Plant</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>${lines}</tbody></table>
+    <table><thead><tr><th>${escapeHtml(labels.plant)}</th><th>${escapeHtml(labels.qty)}</th><th>${escapeHtml(labels.price)}</th><th>${escapeHtml(labels.total)}</th></tr></thead><tbody>${lines}</tbody></table>
     ${taxRow}
     <p class="total">${money(receipt.netTotal)}</p>
   </body></html>`);
@@ -91,10 +109,15 @@ function printReceipt(receipt: Receipt, nurseryName: string, currencyCode?: stri
 export function POS() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const paidSim = usePaidSimulation();
   const currency = user?.nursery?.currencyCode;
   const money = (value: string | number) => formatMoney(value, currency);
   const showGst = isInr(currency);
-  const [taxPct, setTaxPct] = useState(0);
+  const gstSlabs =
+    user?.nursery?.gstSlabs && user.nursery.gstSlabs.length > 0
+      ? user.nursery.gstSlabs
+      : [0, 5, 12, 18];
+  const [taxPct, setTaxPct] = useState(() => Number(user?.nursery?.gstDefaultPct ?? 0));
   const [scan, setScan] = useState('');
   const [catalogQuery, setCatalogQuery] = useState('');
   const [plants, setPlants] = useState<PlantInventory[]>([]);
@@ -103,7 +126,7 @@ export function POS() {
   const [channelOptions, setChannelOptions] = useState<ChannelChoice[]>(FALLBACK_CHANNELS);
   const [channel, setChannel] = useState('RETAIL_COUNTER');
   const [payment, setPayment] = useState('CASH');
-  const [customerName, setCustomerName] = useState('Walk-in Customer');
+  const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerCity, setCustomerCity] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -127,6 +150,20 @@ export function POS() {
       return false;
     }
   });
+
+  useEffect(() => {
+    setCustomerName((prev) => (prev ? prev : t('pos.walkIn')));
+  }, [t]);
+
+  useEffect(() => {
+    const next = Number(user?.nursery?.gstDefaultPct ?? 0);
+    setTaxPct(Number.isFinite(next) ? next : 0);
+  }, [user?.nursery?.id, user?.nursery?.gstDefaultPct]);
+
+  useEffect(() => {
+    if (!gstSlabs.includes(taxPct)) setTaxPct(gstSlabs[0] ?? 0);
+  }, [gstSlabs, taxPct]);
+
   const demoTimers = useRef<number[]>([]);
 
   const loadDesk = () => {
@@ -682,10 +719,11 @@ export function POS() {
               <div>
                 <span className="label mb-1">{t('pos.gstPct')}</span>
                 <select className="input" value={taxPct} onChange={(event) => setTaxPct(Number(event.target.value))}>
-                  <option value={0}>{t('pos.gstNone')}</option>
-                  <option value={5}>5%</option>
-                  <option value={12}>12%</option>
-                  <option value={18}>18%</option>
+                  {gstSlabs.map((pct) => (
+                    <option key={pct} value={pct}>
+                      {pct === 0 ? t('pos.gstNone') : t('pos.gstSlab', { pct })}
+                    </option>
+                  ))}
                 </select>
                 <p className="mt-1 text-xs text-slate-500">{t('pos.gstLocalNote')}</p>
               </div>
@@ -782,15 +820,39 @@ export function POS() {
             <button
               className="btn-primary mt-4 w-full"
               type="button"
-              onClick={() => printReceipt(
-                receipt,
-                user?.nursery?.name || 'Nursery',
-                currency,
-                t('pos.gstAmount'),
-              )}
+              onClick={() =>
+                printReceipt(receipt, user?.nursery?.name || t('pos.title'), currency, {
+                  plant: t('pos.receiptPlant'),
+                  qty: t('pos.qty'),
+                  price: t('pos.unit'),
+                  total: t('pos.total'),
+                  tax: t('pos.gstAmount'),
+                  brandSub: t('brand.logistics'),
+                })
+              }
             >
               <Printer className="h-4 w-4" aria-hidden />
               {t('pos.printReceipt')}
+            </button>
+            <button
+              className="btn-ghost mt-2 w-full min-h-12"
+              type="button"
+              onClick={() =>
+                paidSim.requestPaidService({
+                  kind: 'WHATSAPP',
+                  title: t('pos.whatsappBill'),
+                  onMock: async () => {
+                    window.alert(
+                      t('pos.whatsappMockOk', {
+                        phone: receipt.customerPhone || t('pos.walkIn'),
+                        invoice: receipt.invoiceNumber,
+                      }),
+                    );
+                  },
+                })
+              }
+            >
+              {t('pos.whatsappBill')}
             </button>
           </div>
         )}

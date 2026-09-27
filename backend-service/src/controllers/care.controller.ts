@@ -29,7 +29,7 @@ export async function listCare(_req: Request, res: Response): Promise<void> {
   const [tasks, diseases] = await Promise.all([
     prisma.careSchedule.findMany({
       orderBy: { scheduledOn: 'asc' },
-      include: { plant: { select: { id: true, sku: true, commonName: true } } },
+      include: { plant: { select: { id: true, sku: true, commonName: true, zoneLabel: true } } },
       take: 200,
     }),
     prisma.diseaseLog.findMany({ orderBy: { observedOn: 'desc' }, take: 100 }),

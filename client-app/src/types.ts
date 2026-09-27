@@ -23,7 +23,15 @@ export interface User {
   role: Role;
   isPlatformOwner?: boolean;
   features?: string[];
-  nursery?: { id: string; name: string; code: string; status: string; currencyCode?: string } | null;
+  nursery?: {
+    id: string;
+    name: string;
+    code: string;
+    status: string;
+    currencyCode?: string;
+    gstDefaultPct?: number;
+    gstSlabs?: number[];
+  } | null;
 }
 
 export interface MotherPlant {

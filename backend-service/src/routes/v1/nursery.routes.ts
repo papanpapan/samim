@@ -7,11 +7,13 @@ import { validate } from '../../middlewares/validator.middleware';
 import {
   addPlaceUser,
   getMyNursery,
+  gstSettingsSchema,
   listMyChannels,
   personUpdateSchema,
   placeUserSchema,
   removePlaceUser,
   roleFeatureSchema,
+  updateGstSettings,
   updatePlaceUser,
   updateRoleFeatures,
 } from '../../controllers/nursery.controller';
@@ -22,6 +24,12 @@ router.use(authenticate, asyncHandler(attachTenant), requireNursery);
 
 router.get('/', authorize('ADMIN', 'MANAGER'), asyncHandler(getMyNursery));
 router.get('/channels', asyncHandler(listMyChannels));
+router.patch(
+  '/gst',
+  authorize('ADMIN'),
+  validate({ body: gstSettingsSchema }),
+  asyncHandler(updateGstSettings),
+);
 router.patch(
   '/roles/:role/features',
   authorize('ADMIN', 'MANAGER'),

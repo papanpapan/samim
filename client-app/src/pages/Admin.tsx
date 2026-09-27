@@ -37,7 +37,7 @@ export function Admin() {
         <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">{t('admin.peopleHeading')}</h2>
         <p className="mt-2 text-sm text-slate-500">{t('admin.peopleHelp')}</p>
         <Link
-          to="/nursery"
+          to="/staff-team"
           className="btn-primary mt-4 inline-flex items-center gap-2"
         >
           {t('admin.managePeople')}

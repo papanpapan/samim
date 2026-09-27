@@ -8,6 +8,7 @@ import { writeAudit } from '../services/audit.service';
 import { currentNurseryId } from '../services/tenantContext';
 import { assertUserCapacity } from '../services/plan.service';
 import { enabledChannelChoices } from '../services/channelAccess.service';
+import { formatGstSlabs, parseGstSlabs } from '../utils/gst';
 
 const roleEnum = z.enum(['ADMIN', 'MANAGER', 'STAFF', 'CASHIER']);
 const ROLES = roleEnum.options;
@@ -15,6 +16,11 @@ const ROLES = roleEnum.options;
 export const roleFeatureSchema = z.object({
   features: z.array(z.string()),
   inherit: z.boolean().optional(),
+});
+
+export const gstSettingsSchema = z.object({
+  gstDefaultPct: z.number().min(0).max(100),
+  gstSlabs: z.array(z.number().min(0).max(100)).min(1).max(12),
 });
 
 const personSelect = {
@@ -93,6 +99,8 @@ export async function getMyNursery(_req: Request, res: Response): Promise<void> 
       onboardedAt: nursery.onboardedAt,
       plan: nursery.plan,
       currencyCode: nursery.currencyCode === 'INR' ? 'INR' : 'BDT',
+      gstDefaultPct: Number(nursery.gstDefaultPct ?? 0),
+      gstSlabs: parseGstSlabs(nursery.gstSlabs),
       userLimit: nursery.userLimit,
       status: nursery.status,
       locations,
@@ -107,6 +115,37 @@ export async function getMyNursery(_req: Request, res: Response): Promise<void> 
           features: inherit ? enabledFeatures : rows.map((row) => row.feature),
         };
       }),
+    },
+  });
+}
+
+export async function updateGstSettings(req: Request, res: Response): Promise<void> {
+  const nurseryId = nurseryIdOrThrow();
+  const body = req.body as z.infer<typeof gstSettingsSchema>;
+  const slabs = parseGstSlabs(body.gstSlabs.join(','));
+  let defaultPct = body.gstDefaultPct;
+  if (!slabs.includes(defaultPct)) {
+    defaultPct = slabs[0] ?? 0;
+  }
+  const nursery = await prisma.nursery.update({
+    where: { id: nurseryId },
+    data: {
+      gstDefaultPct: defaultPct,
+      gstSlabs: formatGstSlabs(slabs),
+    },
+    select: { id: true, gstDefaultPct: true, gstSlabs: true, currencyCode: true },
+  });
+  await writeAudit(req.user!.id, 'UPDATE', 'Nursery', nurseryId, {
+    gstDefaultPct: defaultPct,
+    gstSlabs: slabs,
+  });
+  res.json({
+    success: true,
+    data: {
+      id: nursery.id,
+      currencyCode: nursery.currencyCode === 'INR' ? 'INR' : 'BDT',
+      gstDefaultPct: Number(nursery.gstDefaultPct),
+      gstSlabs: parseGstSlabs(nursery.gstSlabs),
     },
   });
 }

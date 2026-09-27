@@ -13,6 +13,8 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('*'),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60_000),
   RATE_LIMIT_MAX: z.coerce.number().default(100),
+  /** Proxy hops in front of the API (e.g. Vercel rewrite + Render = 2). 0 = use the socket IP. */
+  TRUST_PROXY: z.coerce.number().int().min(0).max(5).default(0),
   /** Swagger UI at /api/docs. Off in production unless explicitly true. */
   ENABLE_API_DOCS: z
     .string()
@@ -23,6 +25,10 @@ const envSchema = z.object({
     }),
   SEED_ADMIN_EMAIL: z.string().email().default('admin@sabanursery.com'),
   SEED_ADMIN_PASSWORD: z.string().min(6).default('Admin@12345'),
+  /** Optional OpenAI-compatible LLM for voice-agent intent parsing. Empty = local rules. */
+  VOICE_LLM_API_KEY: z.string().optional().default(''),
+  VOICE_LLM_BASE_URL: z.string().optional().default(''),
+  VOICE_LLM_MODEL: z.string().optional().default('gpt-4o-mini'),
 });
 
 const parsed = envSchema.superRefine((data, ctx) => {

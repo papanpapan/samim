@@ -3,7 +3,7 @@ export const openApiDocument = {
   openapi: '3.0.3',
   info: {
     title: 'SN-ERMS API',
-    description: 'Saba Nursery Enterprise Resource & Smart Inventory Management System — Backend API v1.',
+    description: 'Saba AgriCo. — Integrated Agri-Supply & Nursery Ecosystem — Backend API v1.',
     version: '3.0.0',
   },
   servers: [

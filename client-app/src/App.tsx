@@ -1,11 +1,14 @@
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { AuthProvider, useAuth } from './auth/AuthContext';
-import { hasRole, POS_ROLES, MANAGER_ROLES, ADMIN_ROLES, SITE_ROLES } from './auth/roles';
+import { PaidSimulationProvider } from './components/PaidSimulation';
+import { hasRole, POS_ROLES, MANAGER_ROLES, ADMIN_ROLES, SITE_ROLES, canRunPos } from './auth/roles';
 import type { Role } from './types';
 import { Platform } from './pages/Platform';
 import { Layout } from './components/Layout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
+import { FieldWorkerHome } from './pages/FieldWorkerHome';
 import { MotherPlants } from './pages/MotherPlants';
 import { Propagation } from './pages/Propagation';
 import { Inventory } from './pages/Inventory';
@@ -16,6 +19,7 @@ import { Distribution } from './pages/Distribution';
 import { Reports } from './pages/Reports';
 import { Admin } from './pages/Admin';
 import { Nursery } from './pages/Nursery';
+import { StaffTeam } from './pages/StaffTeam';
 import { Alerts } from './pages/Alerts';
 import { AlertCase } from './pages/AlertCase';
 import { VoiceDesk } from './pages/VoiceDesk';
@@ -31,24 +35,52 @@ import { Spinner } from './components/ui';
 import { AppHistoryProvider } from './navigation/AppHistory';
 import { ExitHintToast } from './components/AppNavButtons';
 
-function AccessDenied({ reason }: { reason: 'role' | 'feature' | 'owner' }) {
+function AccessRequestPanel({ reason }: { reason: 'role' | 'feature' | 'owner' }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const [sent, setSent] = useState(false);
+  const requestAccess = () => {
+    const payload = {
+      at: new Date().toISOString(),
+      userId: user?.id,
+      email: user?.email,
+      reason,
+      path: window.location.pathname,
+    };
+    const prev = JSON.parse(localStorage.getItem('sn-access-requests') || '[]') as unknown[];
+    localStorage.setItem('sn-access-requests', JSON.stringify([payload, ...prev].slice(0, 40)));
+    setSent(true);
+  };
   return (
     <div className="mx-auto max-w-lg px-4 py-16 text-center">
       <h1 className="text-2xl font-bold text-nursery-950">{t('access.deniedTitle')}</h1>
       <p className="mt-3 text-sm leading-relaxed text-slate-600">
         {reason === 'owner' ? t('access.ownerOnly') : reason === 'role' ? t('access.roleDenied') : t('access.featureDenied')}
       </p>
-      <Link to="/" className="btn-primary mt-8 inline-flex">{t('access.goHome')}</Link>
+      {!sent ? (
+        <button type="button" className="btn-primary mt-6 inline-flex min-h-12" onClick={requestAccess}>
+          {t('access.requestAccess')}
+        </button>
+      ) : (
+        <p className="mt-6 rounded-xl bg-forest-50 px-4 py-3 text-sm text-forest-800 ring-1 ring-forest-200">
+          {t('access.requestSent')}
+        </p>
+      )}
+      <div className="mt-4 flex flex-col items-center gap-2">
+        <Link to="/field" className="btn-ghost inline-flex min-h-12">{t('access.goField')}</Link>
+        <Link to="/" className="btn-primary inline-flex min-h-12">{t('access.goHome')}</Link>
+      </div>
     </div>
   );
 }
 
 function RoleGate({ allow, feature, children }: { allow: readonly Role[]; feature?: string; children: JSX.Element }) {
   const { user } = useAuth();
-  if (!hasRole(user?.role, allow)) return <AccessDenied reason="role" />;
+  const roleOk =
+    feature === 'POS' ? canRunPos(user?.role) : hasRole(user?.role, allow);
+  if (!roleOk) return <AccessRequestPanel reason="role" />;
   if (feature && !user?.isPlatformOwner && user?.features && !user.features.includes(feature)) {
-    return <AccessDenied reason="feature" />;
+    return <AccessRequestPanel reason="feature" />;
   }
   return children;
 }
@@ -56,13 +88,13 @@ function RoleGate({ allow, feature, children }: { allow: readonly Role[]; featur
 function FeatureGate({ feature, children }: { feature: string; children: JSX.Element }) {
   const { user } = useAuth();
   if (user?.isPlatformOwner) return children;
-  if (user?.features && !user.features.includes(feature)) return <AccessDenied reason="feature" />;
+  if (user?.features && !user.features.includes(feature)) return <AccessRequestPanel reason="feature" />;
   return children;
 }
 
 function OwnerGate({ children }: { children: JSX.Element }) {
   const { user } = useAuth();
-  if (!user?.isPlatformOwner) return <AccessDenied reason="owner" />;
+  if (!user?.isPlatformOwner) return <AccessRequestPanel reason="owner" />;
   return children;
 }
 
@@ -83,6 +115,7 @@ function Protected({ children }: { children: JSX.Element }) {
 export default function App() {
   return (
     <AuthProvider>
+      <PaidSimulationProvider>
       <BrowserRouter>
         <AppHistoryProvider>
           <ExitHintToast />
@@ -109,6 +142,8 @@ export default function App() {
               }
             />
             <Route path="/" element={<Dashboard />} />
+            <Route path="/field" element={<FieldWorkerHome />} />
+            <Route path="/staff-team" element={<StaffTeam />} />
             <Route
               path="/nursery"
               element={
@@ -164,6 +199,7 @@ export default function App() {
           </Routes>
         </AppHistoryProvider>
       </BrowserRouter>
+      </PaidSimulationProvider>
     </AuthProvider>
   );
 }

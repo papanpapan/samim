@@ -142,7 +142,7 @@ export async function upiQr(req: Request, res: Response): Promise<void> {
   if (!Number.isFinite(amount) || amount <= 0) {
     throw ApiError.badRequest('A positive amount is required');
   }
-  const payload = `upi://pay?pa=${encodeURIComponent(NURSERY_UPI_VPA)}&pn=${encodeURIComponent('Saba Nursery')}&am=${amount.toFixed(2)}&cu=INR`;
+  const payload = `upi://pay?pa=${encodeURIComponent(NURSERY_UPI_VPA)}&pn=${encodeURIComponent('Saba AgriCo.')}&am=${amount.toFixed(2)}&cu=INR`;
   const qrDataUrl = await generateQrDataUrl(payload);
   res.json({ success: true, data: { vpa: NURSERY_UPI_VPA, amount, qrDataUrl } });
 }

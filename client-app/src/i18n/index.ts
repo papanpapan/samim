@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import bn from './locales/bn.json';
 import en from './locales/en.json';
+import hi from './locales/hi.json';
 import { isSupportedLanguage } from './languages';
 
 const STORAGE_KEY = 'sn-lang';
@@ -15,10 +16,11 @@ void i18n.use(initReactI18next).init({
   resources: {
     bn: { translation: bn },
     en: { translation: en },
+    hi: { translation: hi },
   },
   lng: saved || 'en',
   fallbackLng: 'en',
-  supportedLngs: ['bn', 'en'],
+  supportedLngs: ['bn', 'en', 'hi'],
   nonExplicitSupportedLngs: true,
   interpolation: { escapeValue: false },
   returnNull: false,

@@ -5,10 +5,11 @@ import { Eye, EyeOff, LogIn, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { apiErrorMessage } from '../api/client';
 import { ErrorNote } from '../components/ui';
-import { BrandLockup, LogoMark } from '../components/Logo';
+import SabaAgriLogo, { BRAND_NAME } from '../components/common/SabaAgriLogo';
 import { PreferencesControls } from '../components/PreferencesControls';
 import { AudioAssistTrigger } from '../components/AudioAssistTrigger';
 import { AppNavButtons, InstallHint } from '../components/AppNavButtons';
+import { EnvBadge } from '../components/EnvBadge';
 
 const DEMO = [
   { role: 'Admin', email: 'admin@sabanursery.com', password: 'Admin@12345' },
@@ -60,7 +61,7 @@ export function Login() {
         <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '22px 22px' }} />
 
         <div className="relative z-10 flex h-full flex-col justify-between p-12 xl:p-16">
-          <BrandLockup light subtitle="SN-ERMS · v3.0" />
+          <SabaAgriLogo variant="full" height={48} light tagline={t('brand.tagline')} />
 
           <div className="max-w-lg">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-nursery-300">{t('login.kicker')}</p>
@@ -90,21 +91,22 @@ export function Login() {
         <InstallHint />
         <div className="flex items-center justify-between gap-2 px-3 py-2 lg:absolute lg:right-4 lg:top-4 lg:px-0 lg:py-0">
           <AppNavButtons className="lg:hidden" />
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <EnvBadge />
             <PreferencesControls />
           </div>
         </div>
         <div className="flex flex-1 items-center justify-center px-5 py-6 sm:px-8 sm:py-10">
         <div className="w-full max-w-[420px]">
           <div className="mb-8 lg:hidden">
-            <BrandLockup subtitle="SN-ERMS · v3.0" />
+            <SabaAgriLogo variant="full" height={44} tagline={t('brand.tagline')} />
           </div>
 
           <div className="mb-8 hidden items-center gap-3 lg:flex">
-            <LogoMark className="h-12 w-12" />
+            <SabaAgriLogo variant="icon" height={52} />
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nursery-600">Saba Nursery</p>
-              <p className="text-sm text-nursery-700">{t('login.workspace')}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-nursery-600">{BRAND_NAME}</p>
+              <p className="text-sm text-nursery-700">{t('brand.tagline')}</p>
             </div>
           </div>
 

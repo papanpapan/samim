@@ -1,5 +1,6 @@
-# Render Blueprint — staging API + separate staging PostgreSQL.
+# Render Blueprint — staging web (static PWA) + API + separate staging PostgreSQL.
 # Render dashboard → New → Blueprint → pick this repo, branch "staging".
+# Tester URL: https://saba-agrico-staging.onrender.com
 databases:
   - name: saba-agrico-db-staging
     plan: free
@@ -7,6 +8,31 @@ databases:
     user: saba_staging
 
 services:
+  - type: web
+    name: saba-agrico-staging
+    runtime: static
+    rootDir: client-app
+    branch: staging
+    autoDeploy: true
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: VITE_APP_ENV
+        value: staging
+    headers:
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache, no-store, must-revalidate
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://saba-agrico-api-staging.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
   - type: web
     name: saba-agrico-api-staging
     runtime: node
@@ -33,7 +59,7 @@ services:
       - key: BCRYPT_SALT_ROUNDS
         value: "12"
       - key: CORS_ORIGIN
-        value: https://saba-agrico-staging.vercel.app
+        value: https://saba-agrico-staging.onrender.com,https://saba-agrico-staging.vercel.app
       - key: RATE_LIMIT_MAX
         value: "300"
       - key: TRUST_PROXY

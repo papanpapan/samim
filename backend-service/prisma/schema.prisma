@@ -59,7 +59,7 @@ model Nursery {
   latitude      Float?
   longitude     Float?
   phone         String?
-  onboardedAt   DateTime           @default(now()) @db.Date
+  onboardedAt   DateTime           @default(dbgenerated("CURRENT_DATE")) @db.Date
   plan          String             @default("FREE")
   planPrice     Decimal            @default(0) @db.Decimal(12, 2)
   currencyCode  String             @default("BDT")
